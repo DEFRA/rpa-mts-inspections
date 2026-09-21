@@ -1,0 +1,442 @@
+﻿@model RPA.MTSInspections.ViewModels.BLSSchemeView
+
+@using (Html.BeginForm("BLSSchemePost", "Scheme", FormMethod.Post, new { @id = ViewBag.PlantId }))
+{
+    @Html.AntiForgeryToken()
+
+    <h2 align="center">@ViewBag.SchemeName Scheme Details</h2>
+
+    if (User.IsInRole("MTS Risk Analysis : Admin User"))
+    {
+        <div class="form-group row">
+            @Html.LabelFor(model => model.Throughput, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("Throughput", null, new { @class = "form-control", tabindex = "1" })
+                @Html.ValidationMessageFor(model => model.Throughput, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.NumofInspFail, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("NumofInspFail", null, new { @class = "form-control", tabindex = "6" })
+                @Html.ValidationMessageFor(model => model.NumofInspFail, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.PremisesType, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("PremisesType", null, new { @class = "form-control", tabindex = "2" })
+                @Html.ValidationMessageFor(model => model.PremisesType, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.NumofNonComp, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("NumofNonComp", null, new { @class = "form-control", tabindex = "7" })
+                @Html.ValidationMessageFor(model => model.NumofNonComp, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.OriginofProducts, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("OriginofProducts", null, new { @class = "form-control", tabindex = "3" })
+                @Html.ValidationMessageFor(model => model.OriginofProducts, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.SevofNonComp, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("SevofNonComp", null, new { @class = "form-control", tabindex = "8" })
+                @Html.ValidationMessageFor(model => model.SevofNonComp, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.OperatingHours, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("OperatingHours", null, new { @class = "form-control", tabindex = "4" })
+                @Html.ValidationMessageFor(model => model.OperatingHours, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.NumYrsSinceInsp, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("NumYrsSinceInsp", null, new { @class = "form-control", tabindex = "9" })
+                @Html.ValidationMessageFor(model => model.NumYrsSinceInsp, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.TypeOfOperation, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("TypeOfOperation", null, new { @class = "form-control", tabindex = "5" })
+                @Html.ValidationMessageFor(model => model.TypeOfOperation, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.SchemeYear, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("SchemeYear", null, new { @class = "form-control", tabindex = "10" })
+                @Html.ValidationMessageFor(model => model.SchemeYear, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="temp border col-sm-4">
+                <h4>Nature Of Operation</h4>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionANoSplit.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionANoSplit.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionANoSplit.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionBSplit.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionBSplit.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionBSplit.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionCCatering.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionCCatering.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionCCatering.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionDRetail.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionDRetail.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionDRetail.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionESomeCut.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionESomeCut.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionESomeCut.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionFWholesale.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionFWholesale.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionFWholesale.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionGCutting.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionGCutting.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionGCutting.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionHSlaughter.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionHSlaughter.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionHSlaughter.Option.OptionId)
+                </div>
+            </div>
+            @Html.LabelFor(model => model.LastInspection, "Date of Last Initial Inspection", htmlAttributes: new { @class = "control-label col-md-2 col-sm-offset-2" })
+            <div class="col-sm-4">
+                @Html.TextBoxFor(model => model.LastInspection.Date, "{0:dd/MM/yyyy}", htmlAttributes: new { @class = "date-picker form-control", tabindex = "11" })
+                @Html.ValidationMessageFor(model => model.LastInspection.Date, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-8 col-md-10">
+                <input type="submit" style="margin-bottom:10px" value="Save" class="btn btn-primary" />
+            </div>
+        </div>
+    }
+    else if (User.IsInRole("MTS Risk Analysis : General User – Support Team"))
+    {
+        <div class="form-group row">
+            @Html.LabelFor(model => model.Throughput, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("Throughput", null, new { @class = "form-control", tabindex = "1", @disabled = "disabled" })
+                @Html.ValidationMessageFor(model => model.Throughput, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.NumofInspFail, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("NumofInspFail", null, new { @class = "form-control", tabindex = "6", @disabled = "disabled" })
+                @Html.ValidationMessageFor(model => model.NumofInspFail, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.PremisesType, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("PremisesType", null, new { @class = "form-control", tabindex = "2", @disabled = "disabled" })
+                @Html.ValidationMessageFor(model => model.PremisesType, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.NumofNonComp, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("NumofInspFail", null, new { @class = "form-control", tabindex = "", @disabled = "disabled" })
+                @Html.ValidationMessageFor(model => model.NumofNonComp, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.OriginofProducts, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("OriginofProducts", null, new { @class = "form-control", tabindex = "3", @disabled = "disabled" })
+                @Html.ValidationMessageFor(model => model.OriginofProducts, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.SevofNonComp, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("SevofNonComp", null, new { @class = "form-control", tabindex = "8", @disabled = "disabled" })
+                @Html.ValidationMessageFor(model => model.SevofNonComp, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.OperatingHours, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("OperatingHours", null, new { @class = "form-control", tabindex = "4", @disabled = "disabled" })
+                @Html.ValidationMessageFor(model => model.OperatingHours, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.NumYrsSinceInsp, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("NumYrsSinceInsp", null, new { @class = "form-control", tabindex = "9", @disabled = "disabled" })
+                @Html.ValidationMessageFor(model => model.NumYrsSinceInsp, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.TypeOfOperation, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("TypeOfOperation", null, new { @class = "form-control", tabindex = "5", @disabled = "disabled" })
+                @Html.ValidationMessageFor(model => model.TypeOfOperation, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.SchemeYear, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("SchemeYear", null, new { @class = "form-control", tabindex = "10", @disabled = "disabled" })
+                @Html.ValidationMessageFor(model => model.SchemeYear, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="temp border col-sm-4">
+                <h4>Nature Of Operation</h4>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionANoSplit.Selected, new { @class = "display-text", @disabled = "disabled" })
+
+                    @Html.DisplayFor(model => model.OptionANoSplit.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionANoSplit.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionBSplit.Selected, new { @class = "display-text", @disabled = "disabled" })
+
+                    @Html.DisplayFor(model => model.OptionBSplit.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionBSplit.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionCCatering.Selected, new { @class = "display-text", @disabled = "disabled" })
+
+                    @Html.DisplayFor(model => model.OptionCCatering.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionCCatering.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionDRetail.Selected, new { @class = "display-text", @disabled = "disabled" })
+
+                    @Html.DisplayFor(model => model.OptionDRetail.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionDRetail.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionESomeCut.Selected, new { @class = "display-text", @disabled = "disabled" })
+
+                    @Html.DisplayFor(model => model.OptionESomeCut.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionESomeCut.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionFWholesale.Selected, new { @class = "display-text", @disabled = "disabled" })
+
+                    @Html.DisplayFor(model => model.OptionFWholesale.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionFWholesale.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionGCutting.Selected, new { @class = "display-text", @disabled = "disabled" })
+
+                    @Html.DisplayFor(model => model.OptionGCutting.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionGCutting.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionHSlaughter.Selected, new { @class = "display-text", @disabled = "disabled" })
+
+                    @Html.DisplayFor(model => model.OptionHSlaughter.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionHSlaughter.Option.OptionId)
+                </div>
+            </div>
+            @Html.LabelFor(model => model.LastInspection, "Date of Last Initial Inspection", htmlAttributes: new { @class = "control-label col-md-2 col-sm-offset-2" })
+            <div class="col-sm-4">
+                @Html.TextBoxFor(model => model.LastInspection.Date, "{0:dd/MM/yyyy}", htmlAttributes: new { @class = "form-control", tabindex = "11", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.LastInspection.Date, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    }
+    else if (User.IsInRole("MTS Risk Analysis : General User – Inspector"))
+    {
+        <div class="form-group row">
+            @Html.LabelFor(model => model.Throughput, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("Throughput", null, new { @class = "form-control", tabindex = "1" })
+                @Html.ValidationMessageFor(model => model.Throughput, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.NumofInspFail, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("NumofInspFail", null, new { @class = "form-control", tabindex = "6", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.NumofInspFail, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.PremisesType, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("PremisesType", null, new { @class = "form-control", tabindex = "2" })
+                @Html.ValidationMessageFor(model => model.PremisesType, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.NumofNonComp, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("NumofNonComp", null, new { @class = "form-control", tabindex = "7", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.NumofNonComp, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.OriginofProducts, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("OriginofProducts", null, new { @class = "form-control", tabindex = "3" })
+                @Html.ValidationMessageFor(model => model.OriginofProducts, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.SevofNonComp, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("SevofNonComp", null, new { @class = "form-control", tabindex = "8", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.SevofNonComp, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.OperatingHours, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("OperatingHours", null, new { @class = "form-control", tabindex = "4" })
+                @Html.ValidationMessageFor(model => model.OperatingHours, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.NumYrsSinceInsp, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("NumYrsSinceInsp", null, new { @class = "form-control", tabindex = "9", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.NumYrsSinceInsp, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.TypeOfOperation, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("TypeOfOperation", null, new { @class = "form-control", tabindex = "5" })
+                @Html.ValidationMessageFor(model => model.TypeOfOperation, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.SchemeYear, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-sm-4">
+                @Html.DropDownList("SchemeYear", null, new { @class = "form-control", tabindex = "10", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.SchemeYear, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="temp border col-sm-4">
+                <h4>Nature Of Operation</h4>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionANoSplit.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionANoSplit.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionANoSplit.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionBSplit.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionBSplit.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionBSplit.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionCCatering.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionCCatering.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionCCatering.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionDRetail.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionDRetail.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionDRetail.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionESomeCut.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionESomeCut.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionESomeCut.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionFWholesale.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionFWholesale.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionFWholesale.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionGCutting.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionGCutting.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionGCutting.Option.OptionId)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.OptionHSlaughter.Selected, new { @class = "display-text" })
+
+                    @Html.DisplayFor(model => model.OptionHSlaughter.Option.Name, new { @class = "display-text" })
+
+                    @Html.HiddenFor(model => model.OptionHSlaughter.Option.OptionId)
+                </div>
+            </div>
+            @Html.LabelFor(model => model.LastInspection, "Date of Last Initial Inspection", htmlAttributes: new { @class = "control-label col-md-2 col-sm-offset-2" })
+            <div class="col-sm-4">
+                @Html.TextBoxFor(model => model.LastInspection.Date, "{0:dd/MM/yyyy}", htmlAttributes: new { @class = "form-control", tabindex = "11", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.LastInspection.Date, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-8 col-md-10">
+                <input type="submit" style="margin-bottom:10px" value="Save" class="btn btn-primary" />
+            </div>
+        </div>
+
+        @Html.HiddenFor(model => model.NumofInspFail)
+        @Html.HiddenFor(model => model.NumofNonComp)
+        @Html.HiddenFor(model => model.SevofNonComp)
+        @Html.HiddenFor(model => model.NumYrsSinceInsp)
+        @Html.HiddenFor(model => model.SchemeYear)
+    }
+
+    @Html.Hidden("PlantId")
+
+}
+
+<script>
+    $(function () {
+        $(".date-picker").datepicker({
+            format: 'dd/mm/yy',
+            todayBtn: true,
+            autoclose: true
+        });
+    })
+</script>

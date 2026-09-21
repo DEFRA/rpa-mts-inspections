@@ -1,0 +1,70 @@
+﻿@model IEnumerable<RPA.MTSInspections.Models.Option>
+
+
+@{
+    var result = Model.GroupBy(x => x.Criteria.Name);
+}
+
+@foreach (var item in result)
+{
+    @Html.Action("_WeightingScore", "Admin", item.Key)
+}
+
+<table class="table">
+    <tr>
+        @foreach (var item in result)
+        {
+
+            <th style="width: 400px">
+                <span>@item.Key</span>
+            </th>
+
+        }
+
+        <th style="width: 200px">
+            Rating
+        </th>
+        <th></th>
+    </tr>
+    @foreach (var item in Model)
+    {
+
+        <tr>
+            <td style="width: 400px">
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+
+            <td style="width: 200px">
+                @Html.DisplayFor(modelItem => item.Score)
+            </td>
+
+            @if (item.Criteria.Scheme.Name == "BCC")
+            {
+                <td>
+                    @Html.ActionLink("Edit", "BccEdit", new { id = item.OptionId })
+                </td>
+            }
+            @if (item.Criteria.Scheme.Name == "BLS")
+            {
+                <td>
+                    @Html.ActionLink("Edit", "BlsEdit", new { id = item.OptionId })
+                </td>
+            }
+            @if (item.Criteria.Scheme.Name == "PCG")
+            {
+                <td>
+                    @Html.ActionLink("Edit", "PcgEdit", new { id = item.OptionId })
+                </td>
+            }
+            @if (item.Criteria.Scheme.Name == "SCC")
+            {
+                <td>
+                    @Html.ActionLink("Edit", "SccEdit", new { id = item.OptionId })
+                </td>
+            }
+        </tr>
+        @Html.HiddenFor(modelItem => item.OptionId)
+    }
+
+
+</table>

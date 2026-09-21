@@ -1,0 +1,56 @@
+﻿
+@using (Html.BeginForm("_ImportPartial", "Export", FormMethod.Post, new { enctype = "multipart/form-data", @id = "frmBulk" }))
+
+
+{
+
+    @Html.AntiForgeryToken()
+
+    <h2>Import Data</h2>
+    <p>Add a full new Inspection List or bulk load additions to the Inspection List</p>
+    <input type="file" class="hidden" id="bulkSource" name="bulkSource" />
+
+}
+<label class="btn btn-primary" for="bulkSource">Browse...</label>
+<p> </p>
+<div id="selectedFile" style="color:green;"></div>
+<p> </p>
+    <p>Please Note: File must be in XLSX format. Larger files may take a little time to load</p>
+
+<button class="btn btn-primary" id="runBulk">Upload Selected List</button>
+<p> </p>
+
+<script>
+
+    $("#bulkSource").change(function () {
+        var fn = $("#bulkSource").val();
+
+        if (fn != null) {
+            $("#selectedFile").text(fn);
+        }
+    });
+
+
+    $body = $("body");
+
+    $("#runBulk").click(function () {
+
+        var bs = $("#bulkSource").val();
+        var FileType = bs.split(".").pop();
+
+        if (bs == '') {
+            alert("No Valid File Selected. To Select File Click Browse...")
+        }
+
+
+        else if (FileType != "xlsx") {
+            alert("You have attempted to load a file of type " + FileType + ". Please select a file with extension .xlsx");
+        }
+        else {
+
+            $("#frmBulk").submit();
+        }
+    });
+
+
+</script>

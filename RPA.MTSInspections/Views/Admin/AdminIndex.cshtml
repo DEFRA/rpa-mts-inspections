@@ -1,0 +1,40 @@
+﻿@{
+    ViewBag.Title = "AdminIndex";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Admin Area</h2>
+<div class="row">
+    <h3>@Html.ActionLink("Edit BLS Input Details", "BlsOptions", "Admin")</h3>
+    <p> Edit All BLS Plant Details and Weighting Values</p>
+</div>
+
+<div class="row">
+    <h3>@Html.ActionLink("Edit BCC Input Details", "BccOptions", "Admin")</h3>
+    <p> Edit All BCC Plant Details and Weighting Values</p>
+</div>
+
+<div class="row">
+    <h3>@Html.ActionLink("Edit PCG Input Details", "PcgOptions", "Admin")</h3>
+    <p> Edit All PCG Plant Details and Weighting Values</p>
+</div>
+
+<div class="row">
+    <h3>@Html.ActionLink("Edit SCC Input Details", "SccOptions", "Admin")</h3>
+    <p> Edit All SCC Plant Details and Weighting Values</p>
+</div>
+
+<div class="row">
+    <h3>@Html.ActionLink("Edit Plant Details", "Plants", "Admin")</h3>
+    <p>Edit All Plant Details</p>
+</div>
+
+<div class="row">
+    <h3>@Html.ActionLink("Audit", "PlantAudit", "Admin")</h3>
+    <p>View Audit History for Plants and Schemes</p>
+</div>
+
+<div class="row">
+    <h3>@Html.ActionLink("Calculate All Risk Scores", "CaclulateAllRiskScores", "Scheme")</h3>
+    <p>Force all Risk Scores to Re-calculate</p>
+</div>

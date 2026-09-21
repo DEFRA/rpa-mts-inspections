@@ -1,0 +1,17 @@
+﻿@model List<string>
+
+<table align="center">
+    <tr>
+        <th style="color:red">
+            Error
+        </th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td style="color:red">>
+                @item
+            </td>
+        </tr>
+    }
+</table>

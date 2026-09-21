@@ -1,0 +1,69 @@
+﻿@model RPA.MTSInspections.Models.Criteria
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Edit Weighting Score</title>
+
+    @if (Model.Scheme.Name == "BLS")
+    {
+        <div class="col-md-offset-11">
+             @Html.ActionLink("Back", "BlsOptions")
+        </div>
+    }
+    else if (Model.Scheme.Name == "BCC")
+    {
+        <div class="col-md-offset-11">
+             @Html.ActionLink("Back", "BlsOptions")
+        </div>
+    }
+    else if (Model.Scheme.Name == "PCG")
+    {
+        <div class="col-md-offset-11">
+             @Html.ActionLink("Back", "BlsOptions")
+        </div>
+    }
+</head>
+<body>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-horizontal">
+            <h4>Edit Weighting Score - @Html.DisplayFor(model => model.Name)</h4>
+            <hr />
+
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.CriteriaId)
+            @Html.HiddenFor(model => model.SchemeId)
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Weighting, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Weighting, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Weighting, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+            </div>
+        </div>
+    }
+
+
+
+</body>
+</html>
+
+

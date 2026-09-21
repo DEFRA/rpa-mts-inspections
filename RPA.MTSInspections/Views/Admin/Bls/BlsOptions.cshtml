@@ -1,0 +1,37 @@
+﻿@model List<RPA.MTSInspections.Models.Criteria>
+
+@{
+    ViewBag.Title = "Bls Options";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>BLS Admin Area</h2>
+
+<div>
+    <div class="col-md-1"> @Html.ActionLink("Add New", "BlsCreate") </div>
+    <div class="col-md-offset-11"> @Html.ActionLink("Back", "AdminIndex", "Admin") </div>
+</div>
+
+@{int i = 0;}
+@foreach (var item in Model)
+{
+    <div class="panel-group" id="accordion_@i">
+        <div class="panel panel-default" id="panel_@i">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-target="#collapseOne_@i" href="#collapseOne_@i">
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseOne_@i" class="panel-collapse collapse">
+                <div class="panel-body">
+                    @{
+                        Html.RenderAction("_OptionPartial", "Admin", new { criteriaId = item.CriteriaId });
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    i++;
+}

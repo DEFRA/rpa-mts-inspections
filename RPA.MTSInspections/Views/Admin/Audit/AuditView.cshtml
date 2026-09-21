@@ -1,0 +1,91 @@
+﻿@model PagedList<RPA.MTSInspections.Models.Audit>
+
+@{
+    /**/
+
+    ViewBag.Title = "AuditView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using PagedList.Mvc;
+@using PagedList;
+
+
+<h2>Audit View</h2>
+
+<h3>@Html.ViewBag.plantName</h3>
+
+@using (Html.BeginForm("AuditView", "Admin"))
+{
+    <p>
+        @Html.DropDownList("schemeSelected", new SelectList(ViewBag.schemeList as List<SelectListItem>, "Value", "Text"))
+
+        @Html.Hidden("SelectedValue")
+
+        @Html.Hidden("plantId")
+
+        <button class="btn btn-primary" style="position:static;" id="AuditViewFilter">Filter</button>
+
+    </p>
+
+    <input type="hidden" name="DropDownValue" id="hiddenFormElement" />
+}
+
+<table class="table">
+    <tr>
+
+        <th>
+            @Html.DisplayNameFor(model => model[0].Date)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model[0].User)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model[0].Action)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model[0].PropertyName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model[0].Value)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model[0].NewValue)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+
+
+
+            <td>
+                @item.Date.ToLocalTime()
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.User)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Action)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PropertyName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Value)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NewValue)
+            </td>
+            @Html.HiddenFor(modelItem => item.PlantId)
+        </tr>
+    }
+
+</table>
+
+<div class="float-left clear-left">
+    @Html.PagedListPager(Model, page => Url.Action("AuditView", new { ViewBag.plantId, ViewBag.schemeSelected, page, pageSize = Model.PageSize }))
+    Showing @(Model.TotalItemCount < Model.FirstItemOnPage ? 0 : Model.FirstItemOnPage) to @Model.LastItemOnPage of @Model.TotalItemCount Plants
+</div>

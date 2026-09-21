@@ -1,0 +1,17 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Admin Area</h2>
+
+    <div class="row">
+        <h3>@Html.ActionLink("Edit Plant Details", "Plants", "Admin")</h3>
+        <p>Edit All Plant Details</p>
+    </div>
+
+    <div class="row">
+        <h3>@Html.ActionLink("Audit", "PlantAudit", "Admin")</h3>
+        <p>View Audit History for Plants and Schemes</p>
+    </div>

@@ -1,0 +1,47 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h2 style="text-align:center">MTS Risk Analysis Web Portal</h2>
+
+    <div class="row">
+        <p>
+            MTS Risk Analysis is an application where you can calculate risk scores for multiple schemes.
+        </p>
+    </div>
+
+    <div class="row">
+
+        <h3>@Html.ActionLink("Plants", "Index", "Plant")</h3>
+
+        <p>View Details of all Existing Plants</p>
+    </div>
+
+    @if (User.IsInRole("MTS Risk Analysis : General User – Support Team"))
+    {
+        <div class="row">
+
+            <h3>@Html.ActionLink("Plant and Risk Score Administration", "Index", "Admin")</h3>
+
+            <p>Amend/Add Premises, Amend Risk Criteria, Scoring and Weightings</p>
+        </div>
+
+        <div class="row">
+
+            <h3>@Html.ActionLink("Import/Export Data", "Index", "Export")</h3>
+
+            <p>Bulk Upload Data or Download Data in a CSV file by selecting a Scheme</p>
+        </div>
+    }
+
+    @if (User.IsInRole("MTS Risk Analysis : Admin User"))
+    {
+        <div class="row">
+
+            <h3>@Html.ActionLink("Plant and Risk Score Administration", "AdminIndex", "Admin")</h3>
+
+            <p>Amend/Add Premises, Amend Risk Criteria, Scoring and Weightings</p>
+        </div>
+    }
+</div>

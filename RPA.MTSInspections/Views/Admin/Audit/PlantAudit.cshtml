@@ -1,0 +1,62 @@
+﻿@model PagedList<RPA.MTSInspections.Models.Plant>
+
+@{
+    ViewBag.Title = "Plant";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@using PagedList.Mvc;
+@using PagedList;
+
+<h2>Plant List</h2>
+
+@using (Html.BeginForm())
+{
+    <div class="col-md-2">
+        <input type="text" name="searchString" id="searchString" style="margin-bottom:10px" />
+    </div>
+    <div class="col-md-1" style="margin-bottom:10px">
+        <button class="btn-primary" style="position:static" id="searchButton">Search</button>
+    </div>
+
+    <div class="col-md-1" style="margin-bottom:10px">
+        <button class="btn-primary" style="position:static;" onclick="location.href='@Url.Action("Index", new { searchString = string.Empty })'">Reset</button>
+    </div>
+}
+
+<table class="table">
+    <tr>
+        <th>@Html.DisplayNameFor(model => model[0].LicenceNo)</th>
+
+        <th>@Html.DisplayNameFor(model => model[0].PlantName)</th>
+
+        <th style="text-align:center">@Html.DisplayNameFor(model => model[0].Active)</th>
+
+        <th></th>
+
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.LicenceNo)</td>
+
+            <td>@Html.DisplayFor(modelItem => item.PlantName)</td>
+
+            <td style="text-align:center">@Html.DisplayFor(modelItem => item.Active)</td>
+
+            <td>@Html.ActionLink("View", "AuditView", new { plantId = item.PlantId })</td>
+
+            @Html.HiddenFor(modelItem => item.PlantId)
+        </tr>
+    }
+</table>
+
+<div class="float-left clear-left">
+    @Html.PagedListPager(Model, page => Url.Action("PlantAudit", new { ViewBag.searchData, page, pageSize = Model.PageSize }))
+    Showing @(Model.TotalItemCount < Model.FirstItemOnPage ? 0 : Model.FirstItemOnPage) to @Model.LastItemOnPage of @Model.TotalItemCount Audit
+</div>
+
+
+

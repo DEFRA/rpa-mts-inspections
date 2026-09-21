@@ -1,0 +1,17 @@
+﻿@model RPA.MTSInspections.Models.Criteria
+
+<table class="table">
+    <tr>
+        <th style="width: 400px">
+            @Html.DisplayNameFor(model => model.Weighting)
+        </th>
+
+        <td style="width: 200px">
+            @Html.DisplayFor(model => model.Weighting)
+        </td>
+
+        <td>
+            @Html.ActionLink("Edit", "EditWeightingScore", new { criteriaId = Model.CriteriaId })
+        </td>
+    </tr>
+</table>

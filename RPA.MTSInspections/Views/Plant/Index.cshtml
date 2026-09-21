@@ -1,0 +1,162 @@
+﻿@model PagedList<RPA.MTSInspections.Models.Plant>
+
+@{
+    ViewBag.Title = "Plant";
+}
+
+@using PagedList.Mvc;
+@using PagedList;
+
+<h2>Plant List</h2>
+
+@using (Html.BeginForm())
+{
+    <div>
+        <div class="col-md-2">
+            <input type="text" name="searchString" id="searchString" style="margin-bottom:10px" />
+        </div>
+        <div class="col-md-1" style="margin-bottom:10px">
+            <button class="btn-primary" style="position:static" id="searchButton">Search</button>
+        </div>
+
+        <div class="col-md-1" style="margin-bottom:10px">
+            <button class="btn-primary" style="position:static;" onclick="location.href='@Url.Action("Index", new { searchString = string.Empty })'">Reset</button>
+        </div>
+
+        @*<div class="col-md-offset-11">
+            <p>@Html.ActionLink("Add Plant", "Create", "Admin")</p>
+        </div>*@
+    </div>
+}
+
+<table class="table">
+    <tr>
+        <th style="border-top:none"></th>
+        <th style="border-top:none"></th>
+        <th style="border-top:none"></th>
+        <th colspan="2" style="text-align:center; border:groove">BCC</th>
+        <th colspan="2" style="text-align:center; border:groove">BLS</th>
+        <th colspan="2" style="text-align:center; border:groove">PCG</th>
+        <th colspan="2" style="text-align:center; border:groove">SCC</th>
+    </tr>
+
+    <tr>
+        <th>@Html.DisplayNameFor(model => model[0].LicenceNo)</th>
+
+        <th>@Html.DisplayNameFor(model => model[0].PlantName)</th>
+
+        <th>@Html.DisplayNameFor(model => model[0].PostCode)</th>
+
+        <th style="border-left:groove; text-align:center">Risk Score</th>
+
+        <th style="border-right:groove; text-align:center">Update</th>
+
+        <th style="text-align:center">Risk Score</th>
+
+        <th style="border-right:groove; text-align:center">Update</th>
+
+        <th style="text-align:center">Risk Score</th>
+
+        <th style="border-right:groove; text-align:center">Update</th>
+
+        <th style="text-align:center">Risk Score</th>
+
+        <th style="border-right:groove; text-align:center">Update</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+<tr>
+    <td>@Html.DisplayFor(modelItem => item.LicenceNo)</td>
+
+    <td>@Html.DisplayFor(modelItem => item.PlantName)</td>
+
+    <td>@Html.DisplayFor(modelItem => item.PostCode)</td>
+
+    <td style="border-left:groove; text-align:center">
+        @if (item.BCC == true)
+        {
+            @item.RiskScore.Where(x => x.Scheme.Name == "BCC").Select(x => x.Score).FirstOrDefault()
+        }
+        else
+        {
+            @Html.Display("N/A")
+        }
+    </td>
+
+    <td style="border-right:groove; text-align:center">
+        @if (item.BCC == true)
+        {
+            <p>@Html.ActionLink("Edit", "Details", "Plant", new { id = item.PlantId, scheme = "BCC" }, null)</p>
+        }
+        else
+        {
+            @Html.Display("N/A")
+        }
+    </td>
+
+    <td style="text-align:center">
+        @if (item.BLS == true)
+        {
+            @item.RiskScore.Where(x => x.Scheme.Name == "BLS").Select(x => x.Score).FirstOrDefault()
+        }
+        else
+        {
+            @Html.Display("N/A")
+        }
+
+    </td>
+
+    <td style="border-right:groove; text-align:center">
+        @if (item.BLS == true)
+        {
+
+            <p>@Html.ActionLink("Edit", "Details", "Plant", new { id = item.PlantId, scheme = "BLS" }, null)</p>
+        }
+    </td>
+
+    <td style="text-align:center">
+        @if (item.PCG == true)
+        {
+            @item.RiskScore.Where(x => x.Scheme.Name == "PCG").Select(x => x.Score).FirstOrDefault()
+        }
+        else
+        {
+            @Html.Display("N/A")
+        }
+
+    </td>
+    <td style="border-right:groove; text-align:center">
+        @if (item.PCG == true)
+        {
+            <p>@Html.ActionLink("Edit", "Details", "Plant", new { id = item.PlantId, scheme = "PCG" }, null)</p>
+        }
+    </td>
+
+    <td style="text-align:center">
+        @if (item.SCC == true)
+        {
+            @item.RiskScore.Where(x => x.Scheme.Name == "SCC").Select(x => x.Score).FirstOrDefault()
+        }
+        else
+        {
+            @Html.Display("N/A")
+        }
+
+    </td>
+    <td style="border-right:groove; text-align:center">
+        @if (item.SCC == true)
+        {
+            <p>@Html.ActionLink("Edit", "Details", "Plant", new { id = item.PlantId, scheme = "SCC" }, null)</p>
+        }
+    </td>
+
+    @Html.HiddenFor(modelItem => item.PlantId)
+</tr>
+    }
+</table>
+
+<div class="float-left clear-left">
+    @Html.PagedListPager(Model, page => Url.Action("Index", new { ViewBag.searchData, page, pageSize = Model.PageSize }))
+    Showing @(Model.TotalItemCount < Model.FirstItemOnPage ? 0 : Model.FirstItemOnPage) to @Model.LastItemOnPage of @Model.TotalItemCount Plants
+</div>

@@ -1,0 +1,79 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+@if (User.IsInRole("MTS Risk Analysis : General User – Support Team") || User.IsInRole("MTS Risk Analysis : Admin User"))
+{
+    <h2>Export Data</h2>
+
+
+
+    using (Html.BeginForm("ExportCSV", "Export"))
+    {
+        <p>
+            @Html.DropDownList("ExportListOption", new SelectList(ViewBag.MyCustomCollection as List<SelectListItem>, "Value", "Text"))
+
+            @Html.Hidden("SelectedValue")
+            <div>
+                <button class="btn btn-primary" style="position:static;" id="ExportPlant">Export</button>
+            </div>
+        </p>
+
+        <input type="hidden" name="DropDownValue" id="hiddenFormElement" />
+    }
+
+}
+
+@if (User.IsInRole("MTS Risk Analysis : Admin User"))
+{
+    {
+        Html.RenderAction("_ImportPartial", "Export");
+    }
+
+ }
+
+<!-- Modal -->
+<div class="modal fade in" id="myModal" role="dialog">
+    <div class="modal-dialog modal-sm">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Bulk Data Load</h4>
+            </div>
+            <div class="modal-body">
+                <p>Data Loaded Successfully</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+        
+
+<script>
+    $('#ExportListOption').change(function () {
+
+        var x = $('#ExportListOption option:selected').text();
+
+        $('#hiddenFormElement').val(x);
+    });
+
+
+    $(document).ready(function ()
+        {
+            if ('@ViewBag.UploadSuccess' == 'True')
+    {
+        $('#myModal').modal();
+
+    }
+         });
+</script>
+
+
+
+
+
