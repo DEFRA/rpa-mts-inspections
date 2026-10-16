@@ -1,6 +1,8 @@
-﻿using Moq;
+using Moq;
 using NUnit.Framework;
+using Microsoft.AspNetCore.Mvc.ViewComponents;
 using RPA.MTSInspections.Controllers;
+using RPA.MTSInspections.ViewComponents;
 using RPA.MTSInspections.DAL;
 using RPA.MTSInspections.Models;
 using RPA.MTSInspections.SL;
@@ -11,7 +13,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.MTSInspections.Tests.Controllers
 {
@@ -316,7 +318,7 @@ namespace RPA.MTSInspections.Tests.Controllers
         [Test]
         public void Test_SchemeEditPartial()
         {
-            var result = controller._SchemeEditPartial(Guid.Parse("A462AEEE-537A-4E5D-802D-9B2D6F6F979D"), "BLS") as PartialViewResult;
+            var result = new SchemeEditViewComponent(mockContext.Object, service.Object).WithViewContext().Invoke(Guid.Parse("A462AEEE-537A-4E5D-802D-9B2D6F6F979D"), "BLS") as ViewViewComponentResult;
 
             Assert.AreEqual("_BLSViewPartial", result.ViewName);
         }

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=11" />
@@ -9,13 +9,17 @@
     <link href="https://fonts.googleapis.com/css?family=Hind" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
-    @Scripts.Render("~/bundles/modernizr")
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
-    @Scripts.Render("~/bundles/jqueryui")
-    @Styles.Render("~/Content/bootstrap")
-    @Styles.Render("~/Content/themes/base/css")
-    @Styles.Render("~/Content/css")
+    <script src="~/Scripts/modernizr-2.8.3.js"></script>
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <script src="~/Scripts/bootstrap.js"></script>
+    <script src="~/Scripts/bootstrap-datepicker.js"></script>
+    <script src="~/Scripts/respond.js"></script>
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script src="~/Scripts/jquery.validate.date.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap-datepicker3.css" rel="stylesheet" />
+    <link href="~/Content/Site.css" rel="stylesheet" />
     @RenderSection("scripts", required: false)
 
 </head>
@@ -29,7 +33,7 @@
                     <span class="icon-bar"></span>
                 </button>
                 
-                <div style="margin-top:7px">@Html.ActionLink("MTS Risk Analysis", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })</div>
+                <div style="margin-top:7px"><a asp-controller="Home" asp-action="Index" class="navbar-brand">MTS Risk Analysis</a></div>
                 </div>
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="@Url.Action("Index", "Home")" class="btn btn-default btn-black"> <span class="glyphicon glyphicon-home white" aria-hidden="true"></span> </a></li>

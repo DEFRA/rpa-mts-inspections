@@ -1,17 +1,23 @@
-﻿using EF.Audit;
 using RPA.MTSInspections.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using System.Web;
 
 namespace RPA.MTSInspections.DAL
 {
+    [DbConfigurationType(typeof(MTSInspectionsDbConfiguration))]
     public class MTSInspectionsContext : DbContext
     {
+        // Required by DbMigrator, which creates the context itself; the migration configuration supplies the real connection.
         public MTSInspectionsContext()
             : base("MTSInspectionsContext")
+        {
+            this.Configuration.AutoDetectChangesEnabled = false;
+        }
+
+        public MTSInspectionsContext(string nameOrConnectionString)
+            : base(nameOrConnectionString)
         {
             this.Configuration.AutoDetectChangesEnabled = false;
         }

@@ -1,4 +1,4 @@
-﻿@model RPA.MTSInspections.Models.Plant
+@model RPA.MTSInspections.Models.Plant
 
 @{
     ViewBag.Title = "Details";
@@ -57,9 +57,7 @@
     </div>
 
     <div class="form-group row">
-        @{
-            Html.RenderAction("_RiskScorePartial", "Plant", new { PlantId = Model.PlantId, SchemeId = ViewBag.currentScheme });
-        }
+        @await Component.InvokeAsync("RiskScore", new { id = Model.PlantId, scheme = (string)ViewBag.currentScheme })
         <div class="col-sm-6">
 
         </div>
@@ -75,12 +73,10 @@
 
 @if (ViewBag.errorList != null)
 {
-    Html.RenderAction("_Errors", "Scheme", new { errorList = ViewBag.errorList });
+    <partial name="~/Views/Scheme/_Errors.cshtml" model="(List<string>)ViewBag.errorList" />
 
 }
 
-@{
-    Html.RenderAction("_SchemeEditPartial", "Scheme", new { PlantId = Model.PlantId, Scheme = ViewBag.currentScheme });
-}
+@await Component.InvokeAsync("SchemeEdit", new { PlantId = Model.PlantId, scheme = (string)ViewBag.currentScheme })
 
 

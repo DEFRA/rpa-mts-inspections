@@ -7,9 +7,9 @@ namespace RPA.MTSInspections.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.2.0-61023")]
-    public sealed partial class schemebool : IMigrationMetadata
+    public sealed partial class Schemebool : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(schemebool));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(Schemebool));
         
         string IMigrationMetadata.Id
         {

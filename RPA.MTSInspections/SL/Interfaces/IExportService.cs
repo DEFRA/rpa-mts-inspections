@@ -1,8 +1,8 @@
-﻿using RPA.MTSInspections.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using RPA.MTSInspections.Models;
 using System.Collections.Generic;
 using System.Data;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.MTSInspections.SL
 {
@@ -12,7 +12,7 @@ namespace RPA.MTSInspections.SL
 
         string ConvertListToString(string option);
 
-        List<ErrorLog> RunAddList(HttpPostedFileBase bulkSource);
+        List<ErrorLog> RunAddList(IFormFile bulkSource);
                
     }
 }

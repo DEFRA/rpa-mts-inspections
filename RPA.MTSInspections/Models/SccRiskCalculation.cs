@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace RPA.MTSInspections.Models
@@ -59,10 +59,6 @@ namespace RPA.MTSInspections.Models
             {
                 return 0;
             }
-
-            //set default risk score
-
-            int RiskScore = 0;
 
             //Multiply Rating by Weighting for each Criteria
 

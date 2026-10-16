@@ -1,7 +1,9 @@
-﻿using Moq;
+using Moq;
 using NUnit.Framework;
-using PagedList;
+using X.PagedList;
+using Microsoft.AspNetCore.Mvc.ViewComponents;
 using RPA.MTSInspections.Controllers;
+using RPA.MTSInspections.ViewComponents;
 using RPA.MTSInspections.DAL;
 using RPA.MTSInspections.Models;
 using RPA.MTSInspections.SL;
@@ -12,7 +14,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.MTSInspections.Tests.Controllers
 {
@@ -432,9 +434,9 @@ namespace RPA.MTSInspections.Tests.Controllers
             var criteria1 = new Criteria { CriteriaId = Guid.Parse("C65CC653-C9B6-494F-9847-F7DEA02DDD43"), Name = "Number of Non-Compliance", SchemeId = Guid.Parse("EE9597C9-9479-4486-8506-1374D7F62A16"), Weighting = 10, Scheme = schemeBLS };
             var option1 = new Option { OptionId = Guid.Parse("3C79CCB1-FE98-48C6-8F9E-072B7B97DE6D"), Name = "2>3", CriteriaId = Guid.Parse("C65CC653-C9B6-494F-9847-F7DEA02DDD43"), Active = true, Score = 4, Criteria = criteria1 };
 
-            var result = controller._OptionPartial(Guid.Parse("C65CC653-C9B6-494F-9847-F7DEA02DDD43")) as PartialViewResult;
+            var result = new OptionPartialViewComponent(mockContext.Object).WithViewContext().Invoke(Guid.Parse("C65CC653-C9B6-494F-9847-F7DEA02DDD43"));
 
-            Assert.AreEqual("2>3", ((Option)result.ViewData.Model).Name);
+            Assert.AreEqual("2>3", result.ModelOf<List<Option>>().First().Name);
         }
 
         [Test]
@@ -444,9 +446,9 @@ namespace RPA.MTSInspections.Tests.Controllers
             var criteria1 = new Criteria { CriteriaId = Guid.Parse("C65CC653-C9B6-494F-9847-F7DEA02DDD43"), Name = "Number of Non-Compliance", SchemeId = Guid.Parse("EE9597C9-9479-4486-8506-1374D7F62A16"), Weighting = 10, Scheme = schemeBLS };
             var option1 = new Option { OptionId = Guid.Parse("3C79CCB1-FE98-48C6-8F9E-072B7B97DE6D"), Name = "2>3", CriteriaId = Guid.Parse("C65CC653-C9B6-494F-9847-F7DEA02DDD43"), Active = true, Score = 4, Criteria = criteria1 };
 
-            var result = controller._WeightingScore(Guid.Parse("C65CC653-C9B6-494F-9847-F7DEA02DDD43")) as PartialViewResult;
+            var result = new WeightingScoreViewComponent(mockContext.Object).WithViewContext().Invoke(Guid.Parse("C65CC653-C9B6-494F-9847-F7DEA02DDD43"));
 
-            Assert.AreEqual("Number of Non-Compliance", ((Criteria)result.ViewData.Model).Name);
+            Assert.AreEqual("Number of Non-Compliance", result.ModelOf<Criteria>().Name);
         }
 
         [Test]

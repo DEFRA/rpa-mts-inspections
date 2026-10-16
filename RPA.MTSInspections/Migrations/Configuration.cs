@@ -12,6 +12,11 @@ namespace RPA.MTSInspections.Migrations
             AutomaticMigrationsEnabled = false;
         }
 
+        public Configuration(string connectionString) : this()
+        {
+            TargetDatabase = new System.Data.Entity.Infrastructure.DbConnectionInfo(connectionString, "System.Data.SqlClient");
+        }
+
         protected override void Seed(RPA.MTSInspections.DAL.MTSInspectionsContext context)
         {
             //  This method will be called after migrating to the latest version.

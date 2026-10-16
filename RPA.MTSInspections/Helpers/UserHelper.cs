@@ -1,20 +1,20 @@
-﻿using RPA.MTSInspections.DAL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
 namespace RPA.MTSInspections.Helpers
 {
     public class UserHelper
     {
+        private static IHttpContextAccessor httpContextAccessor;
+
+        // The helper is used statically throughout the controllers and services, so the accessor is supplied once at start-up.
+        public static void Configure(IHttpContextAccessor accessor)
+        {
+            httpContextAccessor = accessor;
+        }
+
         public static string CurrentUser()
         {
             string user = "Unknown";
 
-            var context = HttpContext.Current;
-
-            MTSInspectionsContext db = new MTSInspectionsContext();
+            var context = httpContextAccessor?.HttpContext;
 
             if (context != null)
             {
@@ -31,9 +31,7 @@ namespace RPA.MTSInspections.Helpers
 
         public static string ExistingUser(string user)
         {
-            var context = HttpContext.Current;
-
-            MTSInspectionsContext db = new MTSInspectionsContext();
+            var context = httpContextAccessor?.HttpContext;
 
             if (context != null)
             {

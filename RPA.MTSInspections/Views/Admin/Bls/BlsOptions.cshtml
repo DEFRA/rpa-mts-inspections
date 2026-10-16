@@ -1,4 +1,4 @@
-﻿@model List<RPA.MTSInspections.Models.Criteria>
+@model List<RPA.MTSInspections.Models.Criteria>
 
 @{
     ViewBag.Title = "Bls Options";
@@ -26,9 +26,7 @@
             </div>
             <div id="collapseOne_@i" class="panel-collapse collapse">
                 <div class="panel-body">
-                    @{
-                        Html.RenderAction("_OptionPartial", "Admin", new { criteriaId = item.CriteriaId });
-                    }
+                    @await Component.InvokeAsync("OptionPartial", new { criteriaId = item.CriteriaId })
                 </div>
             </div>
         </div>

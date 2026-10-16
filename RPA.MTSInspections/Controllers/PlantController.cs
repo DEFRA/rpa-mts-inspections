@@ -1,4 +1,3 @@
-﻿using EF.Audit;
 using RPA.MTSInspections.DAL;
 using RPA.MTSInspections.Models;
 using RPA.MTSInspections.SL;
@@ -7,23 +6,15 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.MTSInspections.Controllers
 {
-    [Auditable]
     public class PlantController : Controller
     {
-        MTSInspectionsContext db = new MTSInspectionsContext();
+        MTSInspectionsContext db;
 
         IPlantService PlantService;
-
-        public PlantController()
-        {
-            this.db = new MTSInspectionsContext();
-            this.PlantService = new PlantService(db);
-        }
 
         public PlantController(MTSInspectionsContext context, IPlantService plantService)
         {
@@ -33,7 +24,7 @@ namespace RPA.MTSInspections.Controllers
 
 
         // GET: Plant
-        public ActionResult Index(string searchstring = null, int page = 1, int pageSize = 15)
+        public IActionResult Index(string searchstring = null, int page = 1, int pageSize = 15)
         {
             try
             {
@@ -51,7 +42,7 @@ namespace RPA.MTSInspections.Controllers
 
 
         // GET: Details
-        public ActionResult Details(Guid id, string scheme)
+        public IActionResult Details(Guid id, string scheme)
         {
             Plant plant = db.Plant.Find(id);
 
@@ -62,14 +53,5 @@ namespace RPA.MTSInspections.Controllers
             return View(plant);
         }
 
-        //GET: Risk Score
-        public ActionResult _RiskScorePartial(Guid id, string scheme)
-        {
-            Guid schemeId = db.Scheme.Where(x => x.Name == scheme).Select(x => x.SchemeId).FirstOrDefault();
-
-            RiskScore riskScore = db.RiskScore.Where(x => x.PlantId == id && x.SchemeId == schemeId).FirstOrDefault();
-
-            return PartialView(riskScore);
-        }
     }
 }

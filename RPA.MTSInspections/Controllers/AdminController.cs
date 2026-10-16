@@ -1,17 +1,14 @@
-﻿using RPA.MTSInspections.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using RPA.MTSInspections.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.Entity;
-using PagedList;
+using X.PagedList;
 using RPA.MTSInspections.DAL;
-using EF.Audit;
-using System.Web.UI.WebControls;
-using System.Web.UI;
 using RPA.MTSInspections.SL;
 using RPA.MTSInspections.SL.Interfaces;
 using RPA.MTSInspections.ViewModels;
@@ -28,15 +25,6 @@ namespace RPA.MTSInspections.Controllers
         IPlantService plantService;
         IAuditService auditService;
 
-        public AdminController()
-        {
-            db = new MTSInspectionsContext();
-            plantService = new PlantService(db);
-            criteriaService = new CriteriaService(db);
-            auditService = new AuditService(db);
-
-        }
-
         public AdminController(MTSInspectionsContext context, ICriteriaService criteriaService, IPlantService plantService, IAuditService auditService)
         {
             db = context;
@@ -46,19 +34,19 @@ namespace RPA.MTSInspections.Controllers
         }
 
         // GET: Support Admin Main Page
-        public ActionResult Index()
+        public IActionResult Index()
         {
             return View();
         }
 
         // GET: Admin Main Page
-        public ActionResult AdminIndex()
+        public IActionResult AdminIndex()
         {
             return View();
         }
 
         // GET: BLS List of All existing Criterias
-        public ActionResult BlsOptions()
+        public IActionResult BlsOptions()
         {
             List<Criteria> blsCriteriaList = criteriaService.GetBlsCriteria();
 
@@ -66,7 +54,7 @@ namespace RPA.MTSInspections.Controllers
         }
 
         // GET: BCC List of All existing Criterias
-        public ActionResult BccOptions()
+        public IActionResult BccOptions()
         {
             List<Criteria> bccCriteriaList = criteriaService.GetBccCriteria();
 
@@ -74,7 +62,7 @@ namespace RPA.MTSInspections.Controllers
         }
 
         // GET: PCG List of All existing Criterias
-        public ActionResult PcgOptions()
+        public IActionResult PcgOptions()
         {
             List<Criteria> pcgCriteriaList = criteriaService.GetPcgCriteria();
 
@@ -82,7 +70,7 @@ namespace RPA.MTSInspections.Controllers
         }
 
         // GET: SCC List of All existing Criterias
-        public ActionResult SccOptions()
+        public IActionResult SccOptions()
         {
             List<Criteria> sccCriteriaList = criteriaService.GetSccCriteria();
 
@@ -92,7 +80,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: BLS Edit an option
         [HttpGet]
-        public ActionResult BlsEdit(Guid id)
+        public IActionResult BlsEdit(Guid id)
         {
             Option option = db.Option.Find(id);
 
@@ -101,7 +89,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Bcc Edit an option
         [HttpGet]
-        public ActionResult BccEdit(Guid id)
+        public IActionResult BccEdit(Guid id)
         {
             Option option = db.Option.Find(id);
 
@@ -110,7 +98,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Scc Edit an option
         [HttpGet]
-        public ActionResult SccEdit(Guid id)
+        public IActionResult SccEdit(Guid id)
         {
             Option option = db.Option.Find(id);
 
@@ -119,7 +107,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Pcg Edit an option
         [HttpGet]
-        public ActionResult PcgEdit(Guid id)
+        public IActionResult PcgEdit(Guid id)
         {
             Option option = db.Option.Find(id);
 
@@ -129,7 +117,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Option BLS Create Select List
         [HttpGet]
-        public ActionResult BlsCreate()
+        public IActionResult BlsCreate()
         {
             var blsCriteriaList = criteriaService.GetBlsSelectCriteria();
 
@@ -140,7 +128,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Option BCC Create Select List
         [HttpGet]
-        public ActionResult BccCreate()
+        public IActionResult BccCreate()
         {
             var bccCriteriaList = criteriaService.GetBccSelectCriteria();
 
@@ -151,7 +139,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Option PCG Create Select List
         [HttpGet]
-        public ActionResult PcgCreate()
+        public IActionResult PcgCreate()
         {
             var pcgCriteriaList = criteriaService.GetPcgSelectCriteria();
 
@@ -162,7 +150,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Option SCC Create Select List
         [HttpGet]
-        public ActionResult SccCreate()
+        public IActionResult SccCreate()
         {
             var sccCriteriaList = criteriaService.GetSccSelectCriteria();
 
@@ -171,25 +159,8 @@ namespace RPA.MTSInspections.Controllers
             return View("~/Views/Admin/Scc/SccCreate.cshtml");
         }
 
-        // GET: Partial view for existing options for this criteria
-
-        public ActionResult _OptionPartial(Guid criteriaId)
-        {
-            List<Option> options = db.Option.Where(x => x.CriteriaId == criteriaId && x.Active == true).ToList();
-
-            return PartialView(options);
-        }
-
-        //GET: Partial view for weighting score of criteria
-        public ActionResult _WeightingScore(Guid criteriaId)
-        {
-            Criteria weightingCriteria = db.Criteria.Where(x => x.CriteriaId == criteriaId).FirstOrDefault();
-
-            return PartialView(weightingCriteria);
-        }
-
         //GET: Edit Weighting Score
-        public ActionResult EditWeightingScore(Guid criteriaId)
+        public IActionResult EditWeightingScore(Guid criteriaId)
         {
             Criteria criteria = db.Criteria.Find(criteriaId);
 
@@ -204,7 +175,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Edit a BLS Option
         [HttpPost]
-        public ActionResult BlsEdit(Option option)
+        public IActionResult BlsEdit(Option option)
         {
 
             db.SetModified(option);
@@ -228,7 +199,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Edit a BCC Option
         [HttpPost]
-        public ActionResult BccEdit(Option option)
+        public IActionResult BccEdit(Option option)
         {
             db.SetModified(option);
 
@@ -251,7 +222,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Edit a SCC Option
         [HttpPost]
-        public ActionResult SccEdit(Option option)
+        public IActionResult SccEdit(Option option)
         {
             db.SetModified(option);
 
@@ -274,7 +245,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Edit a PCG Option
         [HttpPost]
-        public ActionResult PcgEdit(Option option)
+        public IActionResult PcgEdit(Option option)
         {
             db.SetModified(option);
 
@@ -297,7 +268,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Option Create new BLS Option
         [HttpPost]
-        public ActionResult BlsCreate(Option option)
+        public IActionResult BlsCreate(Option option)
         {
             db.Option.Add(option);
             db.SaveChanges();
@@ -307,7 +278,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Option BCC Create new BCC Option
         [HttpPost]
-        public ActionResult BccCreate(Option option)
+        public IActionResult BccCreate(Option option)
         {
             db.Option.Add(option);
             db.SaveChanges();
@@ -317,7 +288,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Option PCG Create new PCG Option
         [HttpPost]
-        public ActionResult PcgCreate(Option option)
+        public IActionResult PcgCreate(Option option)
         {
             db.Option.Add(option);
             db.SaveChanges();
@@ -327,7 +298,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Option SCC Create new SCC Option
         [HttpPost]
-        public ActionResult SccCreate(Option option)
+        public IActionResult SccCreate(Option option)
         {
             db.Option.Add(option);
             db.SaveChanges();
@@ -337,7 +308,7 @@ namespace RPA.MTSInspections.Controllers
 
         //POST: Edit Weighting score
         [HttpPost]
-        public ActionResult EditWeightingScore(Criteria criteria)
+        public IActionResult EditWeightingScore(Criteria criteria)
         {
             Criteria criteriaChange = db.Criteria.Where(x => x.CriteriaId == criteria.CriteriaId).FirstOrDefault();
 
@@ -395,7 +366,7 @@ namespace RPA.MTSInspections.Controllers
         //***************************//
 
         // GET: All Plants
-        public ActionResult Plants(string searchstring = null, int page = 1, int pageSize = 15)
+        public IActionResult Plants(string searchstring = null, int page = 1, int pageSize = 15)
         {
             try
             {
@@ -413,7 +384,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Create Plant
         [HttpGet]
-        public ActionResult Create()
+        public IActionResult Create()
         {
             return View("~/Views/Admin/Plants/Create.cshtml");
         }
@@ -421,7 +392,7 @@ namespace RPA.MTSInspections.Controllers
         // POST: Create Plant
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Plant plant)
+        public IActionResult Create(Plant plant)
         {
             db.Plant.Add(plant);
 
@@ -432,7 +403,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Edit Plant
         [HttpGet]
-        public ActionResult Edit(Guid guid)
+        public IActionResult Edit(Guid guid)
         {
             Plant plant = db.Plant.Find(guid);
 
@@ -441,7 +412,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Edit Plant
         [HttpPost]
-        public ActionResult Edit(Plant plant, string action)
+        public IActionResult Edit(Plant plant, string action)
         {
             
 
@@ -513,7 +484,7 @@ namespace RPA.MTSInspections.Controllers
 
 
         // GET: Plant
-        public ActionResult PlantAudit(string searchstring = null, int page = 1, int pageSize = 15)
+        public IActionResult PlantAudit(string searchstring = null, int page = 1, int pageSize = 15)
         {
             try
             {
@@ -530,7 +501,7 @@ namespace RPA.MTSInspections.Controllers
         }
 
         // GET: Audit View
-        public ActionResult AuditView(Guid plantId, String schemeSelected, int page = 1, int pageSize = 15)
+        public IActionResult AuditView(Guid plantId, String schemeSelected, int page = 1, int pageSize = 15)
         {
             List<Audit> auditList = new List<Audit>();
 

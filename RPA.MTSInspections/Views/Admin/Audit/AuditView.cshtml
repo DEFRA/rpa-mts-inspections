@@ -1,4 +1,4 @@
-﻿@model PagedList<RPA.MTSInspections.Models.Audit>
+@model X.PagedList.IPagedList<RPA.MTSInspections.Models.Audit>
 
 @{
     /**/
@@ -7,8 +7,8 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@using PagedList.Mvc;
-@using PagedList;
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
 
 
 <h2>Audit View</h2>
@@ -86,6 +86,6 @@
 </table>
 
 <div class="float-left clear-left">
-    @Html.PagedListPager(Model, page => Url.Action("AuditView", new { ViewBag.plantId, ViewBag.schemeSelected, page, pageSize = Model.PageSize }))
+    @Html.PagedListPager(Model, page => Url.Action("AuditView", new { plantId = (object)ViewBag.plantId, schemeSelected = (object)ViewBag.schemeSelected, page, pageSize = Model.PageSize }))
     Showing @(Model.TotalItemCount < Model.FirstItemOnPage ? 0 : Model.FirstItemOnPage) to @Model.LastItemOnPage of @Model.TotalItemCount Plants
 </div>

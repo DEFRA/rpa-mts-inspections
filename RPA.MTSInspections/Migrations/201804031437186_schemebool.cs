@@ -3,7 +3,7 @@ namespace RPA.MTSInspections.Migrations
     using System;
     using System.Data.Entity.Migrations;
     
-    public partial class schemebool : DbMigration
+    public partial class Schemebool : DbMigration
     {
         public override void Up()
         {

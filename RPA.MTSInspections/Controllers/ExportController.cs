@@ -1,11 +1,10 @@
-﻿using RPA.MTSInspections.Models;
+using RPA.MTSInspections.Models;
 using RPA.MTSInspections.SL;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.MTSInspections.Controllers
 {
@@ -14,18 +13,13 @@ namespace RPA.MTSInspections.Controllers
 
         IExportService ExportService;
 
-        public ExportController()
-        {
-            this.ExportService = new ExportService();
-        }
-
         public ExportController(IExportService exportService)
         {
             this.ExportService = exportService;
         }
 
         // GET: Export
-        public ActionResult Index(bool? upload)
+        public IActionResult Index(bool? upload)
         {
             var myCollection = ExportService.GetMyCollection();
 
@@ -56,7 +50,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Import Partial
 
-        public ActionResult _ImportPartial()
+        public IActionResult _ImportPartial()
         {
             return PartialView();
         }
@@ -66,7 +60,7 @@ namespace RPA.MTSInspections.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
 
-        public ActionResult _ImportPartial(HttpPostedFileBase bulkSource)
+        public IActionResult _ImportPartial(IFormFile bulkSource)
         {
             List<ErrorLog> errorLog = new List<ErrorLog>();
 

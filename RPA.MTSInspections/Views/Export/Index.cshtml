@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = "Index";
 }
 
@@ -27,7 +27,7 @@
 @if (User.IsInRole("MTS Risk Analysis : Admin User"))
 {
     {
-        Html.RenderAction("_ImportPartial", "Export");
+        <partial name="_ImportPartial" />
     }
 
  }

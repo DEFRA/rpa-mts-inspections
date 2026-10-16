@@ -1,4 +1,4 @@
-﻿@model RPA.MTSInspections.Models.Option
+@model RPA.MTSInspections.Models.Option
 @{
     ViewBag.Title = "PcgCreate";
 }
@@ -16,7 +16,7 @@
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
         <div class="form-group">
-            @Html.Label("Criteria", htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.Label("Criteria", "Criteria", new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.DropDownList("CriteriaId", new SelectList(ViewBag.PcgCriteriaList as List<SelectListItem>, "Value", "Text"), new { @class = "form-control" })
             </div>

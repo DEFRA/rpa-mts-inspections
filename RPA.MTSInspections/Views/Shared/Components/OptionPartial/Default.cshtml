@@ -1,4 +1,4 @@
-﻿@model IEnumerable<RPA.MTSInspections.Models.Option>
+@model IEnumerable<RPA.MTSInspections.Models.Option>
 
 
 @{
@@ -7,7 +7,7 @@
 
 @foreach (var item in result)
 {
-    @Html.Action("_WeightingScore", "Admin", item.Key)
+    @await Component.InvokeAsync("WeightingScore", new { criteriaId = (Guid)ViewBag.criteriaId })
 }
 
 <table class="table">

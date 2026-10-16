@@ -1,16 +1,15 @@
-﻿using RPA.MTSInspections.DAL;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using RPA.MTSInspections.DAL;
 using RPA.MTSInspections.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.Data.Entity;
 using System.Data;
 using OfficeOpenXml;
 using RPA.MTSInspections.Helpers;
-using DocumentFormat.OpenXml.Office2013.Excel;
 using System.Globalization;
 
 namespace RPA.MTSInspections.SL
@@ -20,13 +19,6 @@ namespace RPA.MTSInspections.SL
         MTSInspectionsContext db;
         ISchemeService schemeService;
         IAuditService auditService;
-
-        public ExportService()
-        {
-            db = new MTSInspectionsContext();
-            schemeService = new SchemeService(db);
-            auditService = new AuditService(db);
-        }
 
         public ExportService(MTSInspectionsContext context, ISchemeService schemeService, IAuditService auditService)
         {
@@ -813,7 +805,7 @@ namespace RPA.MTSInspections.SL
         }
 
         //Initial method run to Bulk Load data into the application
-        public List<ErrorLog> RunAddList(HttpPostedFileBase bulkSource)
+        public List<ErrorLog> RunAddList(IFormFile bulkSource)
         {
             //set to run 3 times to cover the three tabs in the template
 
@@ -840,10 +832,13 @@ namespace RPA.MTSInspections.SL
 
 
         //method to convert excel template data to DataTable we can use.
-        private DataTable BulkData(HttpPostedFileBase bulkSource, int i)
+        private DataTable BulkData(IFormFile bulkSource, int i)
         {
             string filepath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Uploads", Path.GetFileName(bulkSource.FileName));
-            bulkSource.SaveAs(filepath);
+            using (var upload = new FileStream(filepath, FileMode.Create))
+            {
+                bulkSource.CopyTo(upload);
+            }
 
             DataTable BulkSource = new DataTable("BulkSource");
 
@@ -852,7 +847,8 @@ namespace RPA.MTSInspections.SL
             FileInfo existingFile = new FileInfo(filepath);
 
             ExcelPackage ePack = new ExcelPackage(existingFile);
-            ExcelWorksheet ws = ePack.Workbook.Worksheets[i];
+            // i is the 1-based tab position; the indexer is 1-based on .NET Framework but 0-based in the .NET Standard build of EPPlus
+            ExcelWorksheet ws = ePack.Workbook.Worksheets.ElementAt(i - 1);
 
             //Get the number of columns and the headers of each column
 

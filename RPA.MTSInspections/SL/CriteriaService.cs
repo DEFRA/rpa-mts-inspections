@@ -1,11 +1,11 @@
-﻿using RPA.MTSInspections.DAL;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using RPA.MTSInspections.DAL;
 using RPA.MTSInspections.Models;
 using RPA.MTSInspections.SL.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.MTSInspections.SL
 {

@@ -3,7 +3,7 @@ namespace RPA.MTSInspections.Migrations
     using System;
     using System.Data.Entity.Migrations;
     
-    public partial class initialbuild : DbMigration
+    public partial class Initialbuild : DbMigration
     {
         public override void Up()
         {

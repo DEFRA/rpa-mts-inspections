@@ -3,7 +3,7 @@ namespace RPA.MTSInspections.Migrations
     using System;
     using System.Data.Entity.Migrations;
     
-    public partial class plantfieldupdates : DbMigration
+    public partial class Plantfieldupdates : DbMigration
     {
         public override void Up()
         {

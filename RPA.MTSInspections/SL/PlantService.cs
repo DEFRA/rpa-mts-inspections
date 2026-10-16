@@ -1,5 +1,4 @@
-﻿using EF.Audit;
-using PagedList;
+using X.PagedList;
 using RPA.MTSInspections.DAL;
 using RPA.MTSInspections.Models;
 using RPA.MTSInspections.SL;
@@ -10,20 +9,14 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.Data.Entity;
 
 namespace RPA.MTSInspections.SL
 {
     public class PlantService : IPlantService
     {
-        MTSInspectionsContext db = new MTSInspectionsContext();
-
-        public PlantService()
-        {
-            this.db = new MTSInspectionsContext();
-        }
+        MTSInspectionsContext db;
 
         public PlantService(MTSInspectionsContext context)
         {

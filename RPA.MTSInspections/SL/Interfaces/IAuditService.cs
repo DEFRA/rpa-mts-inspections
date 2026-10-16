@@ -1,4 +1,3 @@
-﻿using EF.Audit;
 using RPA.MTSInspections.ViewModels;
 using System;
 

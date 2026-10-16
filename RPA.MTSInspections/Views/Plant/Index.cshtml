@@ -1,11 +1,11 @@
-﻿@model PagedList<RPA.MTSInspections.Models.Plant>
+@model X.PagedList.IPagedList<RPA.MTSInspections.Models.Plant>
 
 @{
     ViewBag.Title = "Plant";
 }
 
-@using PagedList.Mvc;
-@using PagedList;
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
 
 <h2>Plant List</h2>
 
@@ -157,6 +157,6 @@
 </table>
 
 <div class="float-left clear-left">
-    @Html.PagedListPager(Model, page => Url.Action("Index", new { ViewBag.searchData, page, pageSize = Model.PageSize }))
+    @Html.PagedListPager(Model, page => Url.Action("Index", new { searchData = (string)ViewBag.searchData, page, pageSize = Model.PageSize }))
     Showing @(Model.TotalItemCount < Model.FirstItemOnPage ? 0 : Model.FirstItemOnPage) to @Model.LastItemOnPage of @Model.TotalItemCount Plants
 </div>

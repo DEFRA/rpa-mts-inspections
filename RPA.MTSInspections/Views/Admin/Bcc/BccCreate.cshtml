@@ -1,4 +1,4 @@
-﻿@model RPA.MTSInspections.Models.Option
+@model RPA.MTSInspections.Models.Option
 @{
     ViewBag.Title = "BccCreate";
 }
@@ -14,7 +14,7 @@
     <div class="form-horizontal">
 
         <div class="form-group">
-            @Html.Label("Criteria", htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.Label("Criteria", "Criteria", new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.DropDownList("CriteriaId", new SelectList(ViewBag.BccCriteriaList as List<SelectListItem>, "Value", "Text"), new { @class = "form-control" })
             </div>

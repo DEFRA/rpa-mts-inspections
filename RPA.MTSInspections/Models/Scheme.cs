@@ -1,9 +1,7 @@
-﻿using EF.Audit;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Web;
 
 namespace RPA.MTSInspections.Models
 {

@@ -1,10 +1,10 @@
-﻿using RPA.MTSInspections.DAL;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using RPA.MTSInspections.DAL;
 using RPA.MTSInspections.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.Data.Entity;
 using RPA.MTSInspections.ViewModels;
 
@@ -13,11 +13,6 @@ namespace RPA.MTSInspections.SL
     public class SchemeService : ISchemeService
     {
         MTSInspectionsContext db = new MTSInspectionsContext();
-
-        public SchemeService()
-        {
-            this.db = new MTSInspectionsContext();
-        }
 
         public SchemeService(MTSInspectionsContext context)
         {
