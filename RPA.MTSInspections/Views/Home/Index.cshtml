@@ -18,7 +18,7 @@
         <p>View Details of all Existing Plants</p>
     </div>
 
-    @if (User.IsInRole("MTS Risk Analysis : General User – Support Team"))
+    @if (Access.IsSupport(User))
     {
         <div class="row">
 
@@ -35,7 +35,7 @@
         </div>
     }
 
-    @if (User.IsInRole("MTS Risk Analysis : Admin User"))
+    @if (Access.IsAdmin(User))
     {
         <div class="row">
 

@@ -7,14 +7,25 @@
     <RootNamespace>RPA.MTSInspections</RootNamespace>
     <AssemblyName>RPA.MTSInspections</AssemblyName>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <UserSecretsId>rpa-mts-inspections-local</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.5.5" />
+    <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.6.5" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
     <PackageReference Include="EntityFramework" Version="6.5.2" />
     <PackageReference Include="EPPlus" Version="4.5.3.3" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="3.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="10.0.13" />
+    <PackageReference Include="Microsoft.EntityFramework.SqlServer" Version="6.5.2" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="4.16.1" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.14" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
     <PackageReference Include="X.PagedList.Mvc.Core" Version="10.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="RPA.MTSInspections.Tests" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,11 +36,6 @@
     <EmbeddedResource Update="Migrations\*.resx">
       <DependentUpon>%(Filename).cs</DependentUpon>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- Bulk uploads are saved under the application base directory -->
-    <None Update="Uploads\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

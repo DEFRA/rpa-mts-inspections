@@ -7,9 +7,12 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using RPA.MTSInspections.Services;
 
 namespace RPA.MTSInspections.Controllers
 {
+    [Authorize(Policy = MtsPolicies.ReadAccess)]
     public class PlantController : Controller
     {
         MTSInspectionsContext db;

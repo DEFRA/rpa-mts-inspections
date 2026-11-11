@@ -1,0 +1,2 @@
+# Golden CSV exports are compared byte for byte; never normalise their line endings.
+RPA.MTSInspections.Tests/Golden/** -text

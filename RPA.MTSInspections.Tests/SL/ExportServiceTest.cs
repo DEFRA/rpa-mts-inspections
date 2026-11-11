@@ -321,7 +321,7 @@ namespace RPA.MTSInspections.Tests.SL
             //Setup Service Injecting Mocked Context
             Sservice = new Mock<ISchemeService>();
             Aservice = new Mock<IAuditService>();
-            service = new ExportService(mockContext.Object, Sservice.Object, Aservice.Object);
+            service = new ExportService(mockContext.Object, Sservice.Object, Aservice.Object, new FakeUser(), Microsoft.Extensions.Options.Options.Create(new RPA.MTSInspections.Services.UploadOptions()));
 
         }
 

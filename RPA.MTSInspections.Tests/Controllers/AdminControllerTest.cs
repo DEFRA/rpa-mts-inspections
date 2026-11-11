@@ -328,7 +328,7 @@ namespace RPA.MTSInspections.Tests.Controllers
             Cservice = new CriteriaService(mockContext.Object);
 
             //Setup controller
-            controller = new AdminController(mockContext.Object, Cservice, Pservice, Aservice);
+            controller = new AdminController(mockContext.Object, Cservice, Pservice, Aservice, new FakeUser());
         }
 
         //GET

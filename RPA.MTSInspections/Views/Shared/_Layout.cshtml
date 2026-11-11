@@ -5,12 +5,10 @@
     <meta charset="utf-8" />
     <title>MTS Risk Analysis</title>
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link href="https://fonts.googleapis.com/css?family=Hind" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
     <script src="~/Scripts/modernizr-2.8.3.js"></script>
-    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <script src="~/Scripts/jquery-3.7.1.min.js"></script>
     <script src="~/Scripts/bootstrap.js"></script>
     <script src="~/Scripts/bootstrap-datepicker.js"></script>
     <script src="~/Scripts/respond.js"></script>
@@ -37,6 +35,10 @@
                 </div>
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="@Url.Action("Index", "Home")" class="btn btn-default btn-black"> <span class="glyphicon glyphicon-home white" aria-hidden="true"></span> </a></li>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <li><a asp-controller="Account" asp-action="SignOut" class="btn btn-default btn-black">Sign out</a></li>
+                }
             </ul>
             </div>
 

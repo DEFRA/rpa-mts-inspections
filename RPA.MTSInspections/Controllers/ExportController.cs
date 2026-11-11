@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using RPA.MTSInspections.Services;
 
 namespace RPA.MTSInspections.Controllers
 {
@@ -19,6 +21,7 @@ namespace RPA.MTSInspections.Controllers
         }
 
         // GET: Export
+        [Authorize(Policy = MtsPolicies.SupportOrAdmin)]
         public IActionResult Index(bool? upload)
         {
             var myCollection = ExportService.GetMyCollection();
@@ -34,6 +37,8 @@ namespace RPA.MTSInspections.Controllers
 
         //POST: Return Requested Export CSV
 
+        [HttpPost]
+        [Authorize(Policy = MtsPolicies.SupportOrAdmin)]
         public FileContentResult ExportCSV(string ExportListOption, string DropDownValue)
         {
             try
@@ -50,6 +55,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Import Partial
 
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult _ImportPartial()
         {
             return PartialView();
@@ -59,7 +65,7 @@ namespace RPA.MTSInspections.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult _ImportPartial(IFormFile bulkSource)
         {
             List<ErrorLog> errorLog = new List<ErrorLog>();

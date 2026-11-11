@@ -12,25 +12,31 @@ using RPA.MTSInspections.DAL;
 using RPA.MTSInspections.SL;
 using RPA.MTSInspections.SL.Interfaces;
 using RPA.MTSInspections.ViewModels;
-using RPA.MTSInspections.Helpers;
+using RPA.MTSInspections.Services;
 using System.Reflection;
 using System.ComponentModel;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RPA.MTSInspections.Controllers
 {
+    // Support and Admin may use the plant and audit screens; criteria, option and weighting administration
+    // is additionally restricted to Admin on the individual actions below (policies combine with AND).
+    [Authorize(Policy = MtsPolicies.SupportOrAdmin)]
     public class AdminController : Controller
     {
         MTSInspectionsContext db;
         ICriteriaService criteriaService;
         IPlantService plantService;
         IAuditService auditService;
+        IUser user;
 
-        public AdminController(MTSInspectionsContext context, ICriteriaService criteriaService, IPlantService plantService, IAuditService auditService)
+        public AdminController(MTSInspectionsContext context, ICriteriaService criteriaService, IPlantService plantService, IAuditService auditService, IUser user)
         {
             db = context;
             this.criteriaService = criteriaService;
             this.plantService = plantService;
             this.auditService = auditService;
+            this.user = user;
         }
 
         // GET: Support Admin Main Page
@@ -40,12 +46,14 @@ namespace RPA.MTSInspections.Controllers
         }
 
         // GET: Admin Main Page
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult AdminIndex()
         {
             return View();
         }
 
         // GET: BLS List of All existing Criterias
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult BlsOptions()
         {
             List<Criteria> blsCriteriaList = criteriaService.GetBlsCriteria();
@@ -54,6 +62,7 @@ namespace RPA.MTSInspections.Controllers
         }
 
         // GET: BCC List of All existing Criterias
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult BccOptions()
         {
             List<Criteria> bccCriteriaList = criteriaService.GetBccCriteria();
@@ -62,6 +71,7 @@ namespace RPA.MTSInspections.Controllers
         }
 
         // GET: PCG List of All existing Criterias
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult PcgOptions()
         {
             List<Criteria> pcgCriteriaList = criteriaService.GetPcgCriteria();
@@ -70,6 +80,7 @@ namespace RPA.MTSInspections.Controllers
         }
 
         // GET: SCC List of All existing Criterias
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult SccOptions()
         {
             List<Criteria> sccCriteriaList = criteriaService.GetSccCriteria();
@@ -80,6 +91,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: BLS Edit an option
         [HttpGet]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult BlsEdit(Guid id)
         {
             Option option = db.Option.Find(id);
@@ -89,6 +101,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Bcc Edit an option
         [HttpGet]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult BccEdit(Guid id)
         {
             Option option = db.Option.Find(id);
@@ -98,6 +111,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Scc Edit an option
         [HttpGet]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult SccEdit(Guid id)
         {
             Option option = db.Option.Find(id);
@@ -107,6 +121,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Pcg Edit an option
         [HttpGet]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult PcgEdit(Guid id)
         {
             Option option = db.Option.Find(id);
@@ -117,6 +132,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Option BLS Create Select List
         [HttpGet]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult BlsCreate()
         {
             var blsCriteriaList = criteriaService.GetBlsSelectCriteria();
@@ -128,6 +144,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Option BCC Create Select List
         [HttpGet]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult BccCreate()
         {
             var bccCriteriaList = criteriaService.GetBccSelectCriteria();
@@ -139,6 +156,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Option PCG Create Select List
         [HttpGet]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult PcgCreate()
         {
             var pcgCriteriaList = criteriaService.GetPcgSelectCriteria();
@@ -150,6 +168,7 @@ namespace RPA.MTSInspections.Controllers
 
         // GET: Option SCC Create Select List
         [HttpGet]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult SccCreate()
         {
             var sccCriteriaList = criteriaService.GetSccSelectCriteria();
@@ -160,6 +179,7 @@ namespace RPA.MTSInspections.Controllers
         }
 
         //GET: Edit Weighting Score
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult EditWeightingScore(Guid criteriaId)
         {
             Criteria criteria = db.Criteria.Find(criteriaId);
@@ -175,6 +195,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Edit a BLS Option
         [HttpPost]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult BlsEdit(Option option)
         {
 
@@ -199,6 +220,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Edit a BCC Option
         [HttpPost]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult BccEdit(Option option)
         {
             db.SetModified(option);
@@ -222,6 +244,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Edit a SCC Option
         [HttpPost]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult SccEdit(Option option)
         {
             db.SetModified(option);
@@ -245,6 +268,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Edit a PCG Option
         [HttpPost]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult PcgEdit(Option option)
         {
             db.SetModified(option);
@@ -268,6 +292,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Option Create new BLS Option
         [HttpPost]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult BlsCreate(Option option)
         {
             db.Option.Add(option);
@@ -278,6 +303,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Option BCC Create new BCC Option
         [HttpPost]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult BccCreate(Option option)
         {
             db.Option.Add(option);
@@ -288,6 +314,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Option PCG Create new PCG Option
         [HttpPost]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult PcgCreate(Option option)
         {
             db.Option.Add(option);
@@ -298,6 +325,7 @@ namespace RPA.MTSInspections.Controllers
 
         // POST: Option SCC Create new SCC Option
         [HttpPost]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult SccCreate(Option option)
         {
             db.Option.Add(option);
@@ -308,6 +336,7 @@ namespace RPA.MTSInspections.Controllers
 
         //POST: Edit Weighting score
         [HttpPost]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult EditWeightingScore(Criteria criteria)
         {
             Criteria criteriaChange = db.Criteria.Where(x => x.CriteriaId == criteria.CriteriaId).FirstOrDefault();
@@ -429,35 +458,35 @@ namespace RPA.MTSInspections.Controllers
                     {
                         if (existingPlant.LicenceNo != plant.LicenceNo)
                         {
-                            auditService.Log(plant.PlantId, UserHelper.CurrentUser(), "Plant Update", "Licence Number", existingPlant.LicenceNo, plant.LicenceNo);
+                            auditService.Log(plant.PlantId, user.Name, "Plant Update", "Licence Number", existingPlant.LicenceNo, plant.LicenceNo);
                         }
                         if (existingPlant.PlantName != plant.PlantName)
                         {
-                            auditService.Log(plant.PlantId, UserHelper.CurrentUser(), "Plant Update", "Plant Name", existingPlant.PlantName, plant.PlantName);
+                            auditService.Log(plant.PlantId, user.Name, "Plant Update", "Plant Name", existingPlant.PlantName, plant.PlantName);
                         }
                         if (existingPlant.AddressOne != plant.AddressOne)
                         {
-                            auditService.Log(plant.PlantId, UserHelper.CurrentUser(), "Plant Update", "Address Line One", existingPlant.AddressOne, plant.AddressOne);
+                            auditService.Log(plant.PlantId, user.Name, "Plant Update", "Address Line One", existingPlant.AddressOne, plant.AddressOne);
                         }
                         if (existingPlant.AddressTwo != plant.AddressTwo)
                         {
-                            auditService.Log(plant.PlantId, UserHelper.CurrentUser(), "Plant Update", "Address Line Two", existingPlant.AddressTwo, plant.AddressTwo);
+                            auditService.Log(plant.PlantId, user.Name, "Plant Update", "Address Line Two", existingPlant.AddressTwo, plant.AddressTwo);
                         }
                         if (existingPlant.TownCity != plant.TownCity)
                         {
-                            auditService.Log(plant.PlantId, UserHelper.CurrentUser(), "Plant Update", "Town/City", existingPlant.TownCity, plant.TownCity);
+                            auditService.Log(plant.PlantId, user.Name, "Plant Update", "Town/City", existingPlant.TownCity, plant.TownCity);
                         }
                         if (existingPlant.County != plant.County)
                         {
-                            auditService.Log(plant.PlantId, UserHelper.CurrentUser(), "Plant Update", "Address Line Two", existingPlant.AddressTwo, plant.County);
+                            auditService.Log(plant.PlantId, user.Name, "Plant Update", "Address Line Two", existingPlant.AddressTwo, plant.County);
                         }
                         if (existingPlant.PostCode != plant.PostCode)
                         {
-                            auditService.Log(plant.PlantId, UserHelper.CurrentUser(), "Plant Update", "Address Line Two", existingPlant.PostCode, plant.PostCode);
+                            auditService.Log(plant.PlantId, user.Name, "Plant Update", "Address Line Two", existingPlant.PostCode, plant.PostCode);
                         }
                         if (existingPlant.Active != plant.Active)
                         {
-                            auditService.Log(plant.PlantId, UserHelper.CurrentUser(), "Plant Update", "Plant Active", existingPlant.Active.ToString(), plant.Active.ToString());
+                            auditService.Log(plant.PlantId, user.Name, "Plant Update", "Plant Active", existingPlant.Active.ToString(), plant.Active.ToString());
                         }
                     }
 

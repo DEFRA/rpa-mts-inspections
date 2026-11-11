@@ -2,7 +2,9 @@ namespace RPA.MTSInspections.Migrations
 {
     using System;
     using System.Data.Entity;
+    using System.Data.Entity.Infrastructure;
     using System.Data.Entity.Migrations;
+    using System.Data.Entity.SqlServer;
     using System.Linq;
 
     internal sealed class Configuration : DbMigrationsConfiguration<RPA.MTSInspections.DAL.MTSInspectionsContext>
@@ -14,7 +16,7 @@ namespace RPA.MTSInspections.Migrations
 
         public Configuration(string connectionString) : this()
         {
-            TargetDatabase = new System.Data.Entity.Infrastructure.DbConnectionInfo(connectionString, "System.Data.SqlClient");
+            TargetDatabase = new DbConnectionInfo(connectionString, MicrosoftSqlProviderServices.ProviderInvariantName);
         }
 
         protected override void Seed(RPA.MTSInspections.DAL.MTSInspectionsContext context)

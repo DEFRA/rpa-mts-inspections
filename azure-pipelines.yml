@@ -1,0 +1,162 @@
+# Azure DevOps pipeline for RPA MTS Inspections.
+#
+# Build, test and scan on every change; build and push an immutable container image from main; deploy through
+# an approved environment. Replace the values marked <...> and create the named service connection and
+# variable group before first use. This file has not been run against a real organisation: validate it in a
+# non-production project first. The pipeline provider and ownership are an open decision (D-08).
+
+trigger:
+  branches:
+    include: [main]
+  paths:
+    exclude: [docs/*, '*.md']
+
+pr:
+  branches:
+    include: [main]
+
+parameters:
+  - name: runSchemaMigration
+    displayName: Apply schema migrations before deploying (DBA-approved only)
+    type: boolean
+    default: false
+
+variables:
+  - group: mts-inspections-pipeline # imageRepository, registryName, resourceGroup, location, plus the app.bicep parameter values
+  - name: dotnetSdk
+    value: '10.0.x'
+  - name: solution
+    value: 'RPA.MTSInspections.sln'
+
+stages:
+  - stage: Build
+    displayName: Build and test
+    jobs:
+      - job: BuildTest
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: UseDotNet@2
+            displayName: Use .NET SDK
+            inputs:
+              packageType: sdk
+              version: $(dotnetSdk)
+
+          - script: dotnet restore $(solution)
+            displayName: Restore
+
+          # Fails when a direct or transitive package has a known vulnerability.
+          - script: |
+              dotnet list $(solution) package --vulnerable --include-transitive 2>&1 | tee vulnerable.txt
+              if grep -q "has the following vulnerable packages" vulnerable.txt; then echo "Vulnerable packages found"; exit 1; fi
+            displayName: Check NuGet vulnerabilities
+
+          - script: dotnet build $(solution) -c Release --no-restore -warnaserror
+            displayName: Build (warnings are errors)
+
+          # LocalDB is not available on the Linux agent, so SQL Server tests are skipped here and run on a Windows agent.
+          - script: >
+              dotnet test $(solution) -c Release --no-build --filter "Category!=SqlServer"
+              --logger trx --results-directory $(Agent.TempDirectory)/results
+            displayName: Test
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: VSTest
+              testResultsFiles: '$(Agent.TempDirectory)/results/*.trx'
+
+      - job: SqlServerTests
+        displayName: EF6 provider and migration tests (Windows, LocalDB)
+        pool:
+          vmImage: windows-latest
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              packageType: sdk
+              version: $(dotnetSdk)
+          - script: dotnet test $(solution) -c Release --filter "Category=SqlServer"
+            displayName: Test against SQL Server LocalDB
+
+  - stage: Package
+    displayName: Build and push image
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - job: Image
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          # The service connection needs AcrPush on the registry only; it is a different identity from the
+          # runtime identity (AcrPull) and from the deployment identity.
+          - task: AzureCLI@2
+            name: push
+            displayName: Build, scan, push and record the image digest
+            inputs:
+              azureSubscription: '<acr-push-service-connection>'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -euo pipefail
+                image="$(registryName).azurecr.io/$(imageRepository):$(Build.BuildId)"
+                docker build -t "$image" .
+
+                # A high or critical finding with an available fix fails the build before anything is pushed.
+                docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image \
+                  --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed "$image"
+
+                az acr login --name "$(registryName)"
+                docker push "$image"
+                digest="$(docker inspect --format='{{index .RepoDigests 0}}' "$image" | sed 's/.*@//')"
+                echo "Pushed $image as $digest"
+                echo "##vso[task.setvariable variable=imageDigest;isOutput=true]$digest"
+  - stage: Deploy
+    displayName: Deploy to Azure Container Apps
+    dependsOn: Package
+    condition: succeeded()
+    variables:
+      imageDigest: $[ stageDependencies.Package.Image.outputs['push.imageDigest'] ]
+    jobs:
+      # The 'mts-inspections-prod' environment carries the approval and check gates.
+      - deployment: Activate
+        environment: mts-inspections-prod
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                # Apply the schema only when the DBA has approved it: set runSchemaMigration to true for that run.
+                # Needs a connection string whose identity may change the schema; never the runtime identity.
+                - ${{ if eq(parameters.runSchemaMigration, true) }}:
+                    - script: |
+                        dotnet run --project RPA.MTSInspections -c Release -- --migrate
+                      displayName: Apply schema migrations
+                      env:
+                        ConnectionStrings__MTSInspectionsContext: $(schemaMigrationConnectionString)
+
+                - task: AzureCLI@2
+                  displayName: Deploy the new revision
+                  inputs:
+                    azureSubscription: '<deploy-service-connection>'
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      set -euo pipefail
+                      az deployment group create \
+                        --name "mts-application-$(Build.BuildId)" \
+                        --resource-group "$(resourceGroup)" \
+                        --template-file infra/app.bicep \
+                        --parameters '@$(appParametersFile)' \
+                        --parameters imageRepository="$(imageRepository)" imageDigest="$(imageDigest)"
+
+                # Smoke test through the public origin: liveness, and that anonymous requests are challenged.
+                - script: |
+                    set -euo pipefail
+                    origin="$(applicationOrigin)"
+                    test "$(curl -s -o /dev/null -w '%{http_code}' "$origin/health/live")" = "200"
+                    code="$(curl -s -o /dev/null -w '%{http_code}' "$origin/Home")"
+                    test "$code" = "302" -o "$code" = "401"
+                  displayName: Smoke test

@@ -1,12 +1,13 @@
 using RPA.MTSInspections.DAL;
-using RPA.MTSInspections.Helpers;
 using RPA.MTSInspections.Models;
+using RPA.MTSInspections.Services;
 using RPA.MTSInspections.SL;
 using RPA.MTSInspections.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.MTSInspections.Controllers
@@ -17,15 +18,36 @@ namespace RPA.MTSInspections.Controllers
         MTSInspectionsContext db;
         IAuditService auditService;
         ISchemeService schemeService;
+        IUser user;
+        RoleAccess access;
 
-        public SchemeController(MTSInspectionsContext context, ISchemeService schemeService, IAuditService auditService)
+        public SchemeController(MTSInspectionsContext context, ISchemeService schemeService, IAuditService auditService, IUser user, RoleAccess access)
         {
             db = context;
             this.schemeService = schemeService;
             this.auditService = auditService;
+            this.user = user;
+            this.access = access;
+        }
+
+        // The stored option for a criteria, or Guid.Empty when none. Fields a role may not change are re-posted
+        // as this value, so whatever the browser sent for them is ignored.
+        private Guid ExistingOptionId(Guid plantID, Guid schemeID, string criteriaName)
+        {
+            return schemeService.GetCurrentPlantOption(plantID, schemeID, criteriaName)?.OptionId ?? Guid.Empty;
+        }
+
+        // After a successful save the scheme's risk score is recalculated in the same POST request.
+        private IActionResult SaveCompleted(Guid plantID, Guid schemeID)
+        {
+            RiskScoreUpdateCalculation(plantID, schemeID);
+
+            return RedirectToAction("Index", "Plant", new { area = "" });
         }
 
         // POST: post action for update to BLS Scheme
+        [HttpPost]
+        [Authorize(Policy = MtsPolicies.SchemeEdit)]
         public IActionResult BLSSchemePost(BLSSchemeView bLSSchemeView, string Plantid)
         {
             //Setup
@@ -37,7 +59,17 @@ namespace RPA.MTSInspections.Controllers
 
             Plant currentPlant = db.Plant.Find(plantID);
 
-            String currentUser = UserHelper.CurrentUser();
+            String currentUser = user.Name;
+
+            // Inspectors cannot change the inspection-history fields (the screen posts them as hidden values).
+            if (!access.IsAdmin(User))
+            {
+                bLSSchemeView.NumofInspFail = ExistingOptionId(plantID, currentScheme.SchemeId, "Number of Inspections Resulting in Failure");
+                bLSSchemeView.NumofNonComp = ExistingOptionId(plantID, currentScheme.SchemeId, "Number of Non-Compliance");
+                bLSSchemeView.SevofNonComp = ExistingOptionId(plantID, currentScheme.SchemeId, "Severity of Non-Compliance");
+                bLSSchemeView.NumYrsSinceInsp = ExistingOptionId(plantID, currentScheme.SchemeId, "Number of Months Since Last Inspection");
+                bLSSchemeView.SchemeYear = ExistingOptionId(plantID, currentScheme.SchemeId, "Scheme Year");
+            }
 
             //Throughput Update
 
@@ -567,7 +599,7 @@ namespace RPA.MTSInspections.Controllers
             }
 
             //Save Function for Last Inspection Date
-            if (User.IsInRole("MTS Risk Analysis : Admin User"))
+            if (access.IsAdmin(User))
             {
                 LastInspection lastInspectionDate = db.LastInspection.Where(x => x.PlantId == plantID && x.SchemeId == currentScheme.SchemeId).FirstOrDefault();
 
@@ -612,11 +644,13 @@ namespace RPA.MTSInspections.Controllers
             {
                 db.SaveChanges();
 
-                return RedirectToAction("RiskScoreUpdate", new { plantIDPass = plantID, schemeIDPass = currentScheme.SchemeId });
+                return SaveCompleted(plantID, currentScheme.SchemeId);
             }
         }
 
         // POST: post action for update to BCC Scheme
+        [HttpPost]
+        [Authorize(Policy = MtsPolicies.SchemeEdit)]
         public IActionResult BCCSchemePost(BCCSchemeView bcCSchemeView, string Plantid)
         {
             //Setup
@@ -628,7 +662,17 @@ namespace RPA.MTSInspections.Controllers
 
             Plant currentPlant = db.Plant.Find(plantID);
 
-            String currentUser = UserHelper.CurrentUser();
+            String currentUser = user.Name;
+
+            // Inspectors cannot change the inspection-history fields (the screen posts them as hidden values).
+            if (!access.IsAdmin(User))
+            {
+                bcCSchemeView.NumofWeeks = ExistingOptionId(plantID, currentScheme.SchemeId, "Number of Weeks Since Last Inspection");
+                bcCSchemeView.FailedVisit = ExistingOptionId(plantID, currentScheme.SchemeId, "Failed/Unsatisfactory on Last Visit");
+                bcCSchemeView.FailedLastThree = ExistingOptionId(plantID, currentScheme.SchemeId, "Number of Failed/Unsatisfactory in Previous 3 Years");
+                bcCSchemeView.MissLastThree = ExistingOptionId(plantID, currentScheme.SchemeId, "Number of Near Misses in Previous 3 Years");
+                bcCSchemeView.SchemeYear = ExistingOptionId(plantID, currentScheme.SchemeId, "Scheme Year");
+            }
 
             //Throughput Update
 
@@ -1075,11 +1119,15 @@ namespace RPA.MTSInspections.Controllers
             {
                 PlantId = plantID,
                 SchemeId = currentScheme.SchemeId,
-                Date = bcCSchemeView.LastInspection.Date
+                Date = bcCSchemeView.LastInspection?.Date ?? default(DateTime)
             };
 
-
-            if (lastInspectionDate == null)
+            // Only Admin may change the last inspection date, whatever the posted form contains.
+            if (!access.IsAdmin(User) || bcCSchemeView.LastInspection == null)
+            {
+                // ignored
+            }
+            else if (lastInspectionDate == null)
             {
                 if (newLastInspectionDate == null)
                 {
@@ -1112,11 +1160,13 @@ namespace RPA.MTSInspections.Controllers
             {
                 db.SaveChanges();
 
-                return RedirectToAction("RiskScoreUpdate", new { plantIDPass = plantID, schemeIDPass = currentScheme.SchemeId });
+                return SaveCompleted(plantID, currentScheme.SchemeId);
             }
         }
 
         // POST: post action for update to PCG Scheme
+        [HttpPost]
+        [Authorize(Policy = MtsPolicies.SchemeEdit)]
         public IActionResult PCGSchemePost(PCGSchemeView pcGSchemeView, string Plantid)
         {
             //Setup
@@ -1128,7 +1178,17 @@ namespace RPA.MTSInspections.Controllers
 
             Plant currentPlant = db.Plant.Find(plantID);
 
-            String currentUser = UserHelper.CurrentUser();
+            String currentUser = user.Name;
+
+            // Inspectors cannot change the inspection-history fields (the screen posts them as hidden values).
+            if (!access.IsAdmin(User))
+            {
+                pcGSchemeView.NumofWeeks = ExistingOptionId(plantID, currentScheme.SchemeId, "Number of Weeks Since Last Inspection");
+                pcGSchemeView.FailedVisit = ExistingOptionId(plantID, currentScheme.SchemeId, "Failed/Unsatisfactory on Last Visit");
+                pcGSchemeView.FailedLastThree = ExistingOptionId(plantID, currentScheme.SchemeId, "Number of Failed/Unsatisfactory in Previous 3 Years");
+                pcGSchemeView.MissLastThree = ExistingOptionId(plantID, currentScheme.SchemeId, "Number of Near Misses in Previous 3 Years");
+                pcGSchemeView.SchemeYear = ExistingOptionId(plantID, currentScheme.SchemeId, "Scheme Year");
+            }
 
             //Throughput Update
 
@@ -1547,10 +1607,15 @@ namespace RPA.MTSInspections.Controllers
             {
                 PlantId = plantID,
                 SchemeId = currentScheme.SchemeId,
-                Date = pcGSchemeView.LastInspection.Date
+                Date = pcGSchemeView.LastInspection?.Date ?? default(DateTime)
             };
 
-            if (lastInspectionDate == null)
+            // Only Admin may change the last inspection date, whatever the posted form contains.
+            if (!access.IsAdmin(User) || pcGSchemeView.LastInspection == null)
+            {
+                // ignored
+            }
+            else if (lastInspectionDate == null)
             {
                 if (newLastInspectionDate == null)
                 {
@@ -1584,11 +1649,13 @@ namespace RPA.MTSInspections.Controllers
             {
                 db.SaveChanges();
 
-                return RedirectToAction("RiskScoreUpdate", new { plantIDPass = plantID, schemeIDPass = currentScheme.SchemeId });
+                return SaveCompleted(plantID, currentScheme.SchemeId);
             }
         }
 
-        // POST: post action for update to PCG Scheme
+        // POST: post action for update to SCC Scheme
+        [HttpPost]
+        [Authorize(Policy = MtsPolicies.SccEdit)]
         public IActionResult SCCSchemePost(SCCSchemeView sccSchemeView, string Plantid)
         {
             //Setup
@@ -1600,7 +1667,7 @@ namespace RPA.MTSInspections.Controllers
 
             Plant currentPlant = db.Plant.Find(plantID);
 
-            String currentUser = UserHelper.CurrentUser();
+            String currentUser = user.Name;
 
             //Throughput Update
             PlantOption throughputOption = schemeService.GetCurrentPlantOption(plantID, currentScheme.SchemeId, "Throughput");
@@ -2036,10 +2103,13 @@ namespace RPA.MTSInspections.Controllers
             {
                 db.SaveChanges();
 
-                return RedirectToAction("RiskScoreUpdate", new { plantIDPass = plantID, schemeIDPass = currentScheme.SchemeId });
+                return SaveCompleted(plantID, currentScheme.SchemeId);
             }
         }
 
+        // POST: recalculates one plant's risk score for one scheme. Admin only; the scheme save does this itself.
+        [HttpPost]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult RiskScoreUpdate(Guid plantIDPass, Guid schemeIDPass)
         {
 
@@ -2052,6 +2122,9 @@ namespace RPA.MTSInspections.Controllers
 
         }
 
+        // POST: recalculates every active plant's risk scores. A write, so it is POST-only and Admin only.
+        [HttpPost]
+        [Authorize(Policy = MtsPolicies.AdminOnly)]
         public IActionResult CaclulateAllRiskScores()
         {
             List<Plant> plantList = db.Plant.Where(x => x.Active == true).ToList();
@@ -2086,7 +2159,7 @@ namespace RPA.MTSInspections.Controllers
         private void RiskScoreUpdateCalculation(Guid plantIDPass, Guid schemeIDPass)
         {
             Scheme currentScheme = db.Scheme.Find(schemeIDPass);
-            String currentUser = UserHelper.CurrentUser();
+            String currentUser = user.Name;
 
             //Recalculate the Risk Score
 

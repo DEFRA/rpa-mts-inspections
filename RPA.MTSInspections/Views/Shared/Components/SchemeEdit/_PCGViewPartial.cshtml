@@ -6,7 +6,7 @@
 
     <h2 align="center">@ViewBag.SchemeName Scheme Details</h2>
 
-    if (User.IsInRole("MTS Risk Analysis : Admin User"))
+    if (Access.IsAdmin(User))
     {
         <div class="form-group row">
             @Html.LabelFor(model => model.Throughput, htmlAttributes: new { @class = "control-label col-md-2" })
@@ -108,7 +108,7 @@
             </div>
         </div>
     }
-    else if (User.IsInRole("MTS Risk Analysis : General User – Support Team"))
+    else if (Access.IsSupport(User))
     {
         <div class="form-group row">
             @Html.LabelFor(model => model.Throughput, htmlAttributes: new { @class = "control-label col-md-2" })
@@ -204,7 +204,7 @@
             </div>
         </div>
     }
-    else if (User.IsInRole("MTS Risk Analysis : General User – Inspector"))
+    else if (Access.IsInspector(User))
     {
         <div class="form-group row">
             @Html.LabelFor(model => model.Throughput, htmlAttributes: new { @class = "control-label col-md-2" })

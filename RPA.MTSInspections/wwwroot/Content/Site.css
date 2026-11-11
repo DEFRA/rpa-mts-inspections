@@ -1,4 +1,19 @@
 ﻿
+/* Hind (SIL Open Font License), latin subset, self-hosted so no request goes to a third-party font service. */
+@font-face {
+    font-family: 'Hind';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(../fonts/hind-400-latin.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Local override kept out of the vendored bootstrap.css so that file stays an unmodified upstream copy. */
+.glyphicon-home:before {
+    color: white;
+}
+
 body {
     font-family: 'Hind', sans-serif;
     padding-top: 50px;
@@ -10,7 +25,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 }
 
 .home {
-    background-image: url(../images/cowhill.jpg);
+    background-image: url(../Images/cowhill.jpg);
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;

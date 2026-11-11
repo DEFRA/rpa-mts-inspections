@@ -3,12 +3,19 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using Microsoft.Data.SqlClient;
 
 namespace RPA.MTSInspections.DAL
 {
     [DbConfigurationType(typeof(MTSInspectionsDbConfiguration))]
     public class MTSInspectionsContext : DbContext
     {
+        static MTSInspectionsContext()
+        {
+            // The schema is released separately (DBA / pipeline); the runtime must never create or alter it implicitly.
+            Database.SetInitializer<MTSInspectionsContext>(null);
+        }
+
         // Required by DbMigrator, which creates the context itself; the migration configuration supplies the real connection.
         public MTSInspectionsContext()
             : base("MTSInspectionsContext")
@@ -16,8 +23,9 @@ namespace RPA.MTSInspections.DAL
             this.Configuration.AutoDetectChangesEnabled = false;
         }
 
-        public MTSInspectionsContext(string nameOrConnectionString)
-            : base(nameOrConnectionString)
+        // The connection is created explicitly so the Microsoft.Data.SqlClient provider is always used.
+        public MTSInspectionsContext(string connectionString)
+            : base(new SqlConnection(connectionString), true)
         {
             this.Configuration.AutoDetectChangesEnabled = false;
         }

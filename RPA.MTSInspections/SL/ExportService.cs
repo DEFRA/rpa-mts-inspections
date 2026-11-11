@@ -9,8 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data.Entity;
 using System.Data;
 using OfficeOpenXml;
-using RPA.MTSInspections.Helpers;
+using RPA.MTSInspections.Services;
 using System.Globalization;
+using Microsoft.Extensions.Options;
 
 namespace RPA.MTSInspections.SL
 {
@@ -19,12 +20,23 @@ namespace RPA.MTSInspections.SL
         MTSInspectionsContext db;
         ISchemeService schemeService;
         IAuditService auditService;
+        UploadOptions uploadOptions;
 
-        public ExportService(MTSInspectionsContext context, ISchemeService schemeService, IAuditService auditService)
+        // Instance replacement for the former static UserHelper: resolves the signed-in user for audit rows.
+        private sealed class AuditActor(IUser user)
+        {
+            public string CurrentUser() => user.Name;
+        }
+
+        private readonly AuditActor UserHelper;
+
+        public ExportService(MTSInspectionsContext context, ISchemeService schemeService, IAuditService auditService, IUser user, IOptions<UploadOptions> uploadOptions)
         {
             db = context;
             this.schemeService = schemeService;
             this.auditService = auditService;
+            this.uploadOptions = uploadOptions.Value;
+            UserHelper = new AuditActor(user);
         }
 
         public List<SelectListItem> GetMyCollection()
@@ -71,7 +83,8 @@ namespace RPA.MTSInspections.SL
 
         public string ConvertListToString(string option)
         {
-            StringWriter writer = new StringWriter();
+            // CRLF is what the Windows-hosted application always produced; keep it so downstream consumers are unaffected on Linux.
+            StringWriter writer = new StringWriter { NewLine = "\r\n" };
 
             List<Plant> plantList = new List<Plant>();
             List <Option> nopList = db.Option.Where(x => x.Criteria.Name == "Nature of Operation").OrderBy(x => x.Name).ToList();
@@ -811,10 +824,15 @@ namespace RPA.MTSInspections.SL
 
             
 
-            for (int i = 1; i < 4; i++)
-            {
-                DataTable table = BulkData(bulkSource, i);
+            var tables = ReadWorkbook(bulkSource);
 
+            if (tables == null)
+            {
+                return errorLog;
+            }
+
+            foreach (DataTable table in tables)
+            {
                 //add each row's data to the database
 
                 foreach (DataRow row in table.Rows)
@@ -831,24 +849,92 @@ namespace RPA.MTSInspections.SL
         }
 
 
-        //method to convert excel template data to DataTable we can use.
-        private DataTable BulkData(IFormFile bulkSource, int i)
+        // Reads the three template worksheets from the request stream. Nothing touches the file system, and every
+        // worksheet is read and bounded before any row is applied. Returns null when the workbook is rejected.
+        private List<DataTable> ReadWorkbook(IFormFile bulkSource)
         {
-            string filepath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Uploads", Path.GetFileName(bulkSource.FileName));
-            using (var upload = new FileStream(filepath, FileMode.Create))
+            if (bulkSource == null || bulkSource.Length == 0)
             {
-                bulkSource.CopyTo(upload);
+                AddToErrorLog("", "", "No workbook was provided");
+                return null;
             }
 
+            if (bulkSource.Length > uploadOptions.MaxFileBytes)
+            {
+                AddToErrorLog("", "", "The workbook is larger than the maximum allowed size");
+                return null;
+            }
+
+            using (var buffer = new MemoryStream())
+            {
+                bulkSource.CopyTo(buffer);
+                buffer.Position = 0;
+
+                ExcelPackage ePack;
+
+                try
+                {
+                    ePack = new ExcelPackage(buffer);
+                }
+                catch (Exception)
+                {
+                    // Anything that is not a readable .xlsx package is reported, never shown as an unhandled error.
+                    AddToErrorLog("", "", "The file is not a valid Excel workbook");
+                    return null;
+                }
+
+                using (ePack)
+                {
+                    if (ePack.Workbook.Worksheets.Count < 3)
+                    {
+                        AddToErrorLog("", "", "The workbook must contain the three template worksheets");
+                        return null;
+                    }
+
+                    var tables = new List<DataTable>();
+
+                    //read the three tabs in the template
+
+                    for (int i = 1; i < 4; i++)
+                    {
+                        DataTable table = BulkData(ePack, i);
+
+                        if (table == null)
+                        {
+                            return null;
+                        }
+
+                        tables.Add(table);
+                    }
+
+                    return tables;
+                }
+            }
+        }
+
+        //method to convert excel template data to DataTable we can use.
+        private DataTable BulkData(ExcelPackage ePack, int i)
+        {
             DataTable BulkSource = new DataTable("BulkSource");
 
             bool firstRowIsHeader = true;
 
-            FileInfo existingFile = new FileInfo(filepath);
-
-            ExcelPackage ePack = new ExcelPackage(existingFile);
             // i is the 1-based tab position; the indexer is 1-based on .NET Framework but 0-based in the .NET Standard build of EPPlus
             ExcelWorksheet ws = ePack.Workbook.Worksheets.ElementAt(i - 1);
+
+            // An empty worksheet has no dimension and simply contributes no rows.
+            if (ws.Dimension == null)
+            {
+                BulkSource.TableName = ws.Name;
+
+                return BulkSource;
+            }
+
+            if (ws.Dimension.End.Row - 1 > uploadOptions.MaxRowsPerSheet)
+            {
+                AddToErrorLog("", ws.Name, "The worksheet has more rows than the maximum allowed");
+                return null;
+            }
 
             //Get the number of columns and the headers of each column
 
@@ -896,8 +982,6 @@ namespace RPA.MTSInspections.SL
             }
 
             BulkSource.TableName = ws.Name;
-
-            File.Delete(filepath);
 
             return BulkSource;
 

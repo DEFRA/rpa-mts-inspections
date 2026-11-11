@@ -2,7 +2,7 @@
     ViewBag.Title = "Index";
 }
 
-@if (User.IsInRole("MTS Risk Analysis : General User – Support Team") || User.IsInRole("MTS Risk Analysis : Admin User"))
+@if (Access.IsSupportOrAdmin(User))
 {
     <h2>Export Data</h2>
 
@@ -24,7 +24,7 @@
 
 }
 
-@if (User.IsInRole("MTS Risk Analysis : Admin User"))
+@if (Access.IsAdmin(User))
 {
     {
         <partial name="_ImportPartial" />

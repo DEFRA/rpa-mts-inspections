@@ -13,6 +13,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace RPA.MTSInspections.Tests.Controllers
@@ -312,7 +313,8 @@ namespace RPA.MTSInspections.Tests.Controllers
             Aservice = new Mock<IAuditService>();
 
             //Setup controller
-            controller = new SchemeController(mockContext.Object, service.Object, Aservice.Object);
+            controller = new SchemeController(mockContext.Object, service.Object, Aservice.Object, new FakeUser(), TestRoles.Access());
+            controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = TestRoles.Principal(TestRoles.Admin) } };
         }
 
         [Test]

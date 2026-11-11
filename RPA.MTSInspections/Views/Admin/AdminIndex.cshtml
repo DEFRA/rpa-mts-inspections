@@ -35,6 +35,10 @@
 </div>
 
 <div class="row">
-    <h3>@Html.ActionLink("Calculate All Risk Scores", "CaclulateAllRiskScores", "Scheme")</h3>
+    <h3>
+        <form asp-controller="Scheme" asp-action="CaclulateAllRiskScores" method="post">
+            <button type="submit" class="btn btn-link" style="font-size:inherit;padding:0;">Calculate All Risk Scores</button>
+        </form>
+    </h3>
     <p>Force all Risk Scores to Re-calculate</p>
 </div>
