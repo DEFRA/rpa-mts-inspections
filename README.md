@@ -95,9 +95,13 @@ schema must already exist: the application never creates or alters it. For a thr
 docker build -t mts-inspections:local .
 ```
 
-The image is a multi-stage .NET 10 Linux build running as a non-root user on port 8080 with ICU enabled (en-GB dates
-and numbers). Pass `--build-arg NUGET_SOURCE=<feed>` when the default NuGet feed is not reachable. The platform
-probes use HTTP 8080 with an allowed `Host` header:
+The multi-stage [Dockerfile](./Dockerfile) follows the Defra .NET container standard
+([defra-docker-dotnetcore](https://github.com/DEFRA/defra-docker-dotnetcore)): a `development`
+stage (`defradigital/dotnetcore-development`) restores, tests and publishes the app; a
+`production` stage (`defradigital/dotnetcore`) runs it as the non-root `dotnet` user with write
+permissions removed. `DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false` keeps ICU enabled (en-GB dates
+and numbers) and it listens on port 8080. Pass `--build-arg NUGET_SOURCE=<feed>` when the default
+NuGet feed is not reachable. The platform probes use HTTP 8080 with an allowed `Host` header:
 
 | Endpoint | Meaning |
 |---|---|
