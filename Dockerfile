@@ -64,8 +64,11 @@ ENV ASPNETCORE_URLS=http://*:${PORT} \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 EXPOSE ${PORT}
 
-# Switch to root temporarily to lock down file permissions.
+# Switch to root temporarily to install ICU and lock down file permissions.
 USER root
+
+# The production parent image ships without ICU, which the en-GB culture needs once invariant mode is off.
+RUN apk add --no-cache icu-libs icu-data-full
 
 # Copy the compiled app from the development build stage, assigning root ownership to
 #   prevent modification by other users.
