@@ -124,13 +124,13 @@ resource acaNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   properties: {
     securityRules: [
       {
-        name: 'AllowPublicHttpsIngress'
+        name: 'AllowPrivateHttpsIngress'
         properties: {
           priority: 200
           access: 'Allow'
           direction: 'Inbound'
           protocol: 'Tcp'
-          sourceAddressPrefix: 'Internet'
+          sourceAddressPrefix: 'VirtualNetwork'
           sourcePortRange: '*'
           destinationAddressPrefix: acaSubnetCidr
           destinationPortRanges: ['443', '31443']
@@ -184,8 +184,8 @@ module logs 'br/public:avm/res/operational-insights/workspace:0.16.1' = {
     skuName: 'PerGB2018'
     dataRetention: logRetentionDays
     forceCmkForQuery: false
-    publicNetworkAccessForIngestion: 'Enabled'
-    publicNetworkAccessForQuery: 'Enabled'
+    publicNetworkAccessForIngestion: 'Disabled'
+    publicNetworkAccessForQuery: 'Disabled'
   }
 }
 
@@ -201,6 +201,8 @@ module insights 'br/public:avm/res/insights/component:0.8.0' = {
     kind: 'web'
     disableIpMasking: false
     disableLocalAuth: true
+    publicNetworkAccessForIngestion: 'Disabled'
+    publicNetworkAccessForQuery: 'Disabled'
     retentionInDays: applicationInsightsRetentionDays
   }
 }
@@ -232,8 +234,8 @@ module registry 'br/public:avm/res/container-registry/registry:0.13.1' = {
     anonymousPullEnabled: false
     roleAssignmentMode: 'LegacyRegistryPermissions'
     azureADAuthenticationAsArmPolicyStatus: 'enabled'
-    publicNetworkAccess: 'Enabled'
-    networkRuleSetDefaultAction: 'Allow'
+    publicNetworkAccess: 'Disabled'
+    networkRuleSetDefaultAction: 'Deny'
     zoneRedundancy: acrZoneRedundant ? 'Enabled' : 'Disabled'
     retentionPolicyStatus: 'disabled'
     exportPolicyStatus: 'enabled'
@@ -408,6 +410,12 @@ var privateServices = [
     groupId: 'blob'
     zone: 'privatelink.blob.${az.environment().suffixes.storage}'
   }
+  {
+    name: 'registry'
+    id: resourceId('Microsoft.ContainerRegistry/registries', 'acr${globalStem}')
+    groupId: 'registry'
+    zone: 'privatelink.azurecr.io'
+  }
 ]
 
 module privateConnections 'modules/private-endpoint.bicep' = [
@@ -423,7 +431,79 @@ module privateConnections 'modules/private-endpoint.bicep' = [
       vnetResourceId: network.outputs.resourceId
       subnetResourceId: '${network.outputs.resourceId}/subnets/private-endpoints'
     }
-    dependsOn: [sql, vault, storage]
+    dependsOn: [sql, vault, storage, registry]
+  }
+]
+
+module monitorScope 'modules/monitor-private-link-scope.bicep' = {
+  name: '${stem}-monitor-scope'
+  params: {
+    name: '${stem}-ampls'
+    tags: tags
+    workspaceResourceId: logs.outputs.resourceId
+    applicationInsightsResourceId: insights.outputs.resourceId
+    workspaceAssociationName: 'workspace-${uniqueString(resourceGroup().id, stem)}'
+    applicationInsightsAssociationName: 'insights-${uniqueString(resourceGroup().id, stem)}'
+  }
+}
+
+// The Monitor private-link group requires all five of these DNS zones. The blob zone is the same
+// 'privatelink.blob.<storage-suffix>' namespace already created and VNet-linked by the storage private endpoint
+// above (see privateServices), so it is referenced here, not recreated, to avoid a duplicate zone/VNet-link.
+var monitorNewZoneNames = [
+  'privatelink.monitor.azure.com'
+  'privatelink.oms.opinsights.azure.com'
+  'privatelink.ods.opinsights.azure.com'
+  'privatelink.agentsvc.azure-automation.net'
+]
+var monitorBlobZoneName = 'privatelink.blob.${az.environment().suffixes.storage}'
+var monitorZoneNames = [
+  'privatelink.monitor.azure.com'
+  'privatelink.oms.opinsights.azure.com'
+  'privatelink.ods.opinsights.azure.com'
+  'privatelink.agentsvc.azure-automation.net'
+  monitorBlobZoneName
+]
+
+module monitorDnsZones 'modules/monitor-private-dns-zone.bicep' = [
+  for zoneName in monitorNewZoneNames: {
+    name: '${stem}-monitor-dns-${uniqueString(resourceGroup().id, zoneName)}'
+    params: {
+      dnsZoneName: zoneName
+      tags: tags
+      createZone: true
+      createVnetLink: false
+      vnetResourceId: network.outputs.resourceId
+    }
+  }
+]
+
+module monitorPrivateEndpoint 'modules/monitor-private-endpoint.bicep' = {
+  name: '${stem}-monitor-private'
+  params: {
+    name: '${stem}-monitor-pe'
+    location: location
+    tags: tags
+    amplsResourceId: monitorScope.outputs.resourceId
+    subnetResourceId: '${network.outputs.resourceId}/subnets/private-endpoints'
+    dnsZoneResourceIds: [for zoneName in monitorZoneNames: resourceId('Microsoft.Network/privateDnsZones', zoneName)]
+  }
+  // The blob zone is owned by the storage private endpoint (privateConnections); wait for it alongside the
+  // four zones created here so every referenced zone exists before the Monitor zone group is written.
+  dependsOn: [monitorDnsZones, privateConnections]
+}
+
+module monitorDnsLinks 'modules/monitor-private-dns-zone.bicep' = [
+  for zoneName in monitorNewZoneNames: {
+    name: '${stem}-monitor-link-${uniqueString(resourceGroup().id, zoneName)}'
+    params: {
+      dnsZoneName: zoneName
+      tags: tags
+      createZone: false
+      createVnetLink: true
+      vnetResourceId: network.outputs.resourceId
+    }
+    dependsOn: [monitorPrivateEndpoint]
   }
 ]
 
@@ -435,8 +515,8 @@ module environment 'br/public:avm/res/app/managed-environment:0.16.0' = {
     tags: tags
     enableTelemetry: false
     infrastructureSubnetResourceId: '${network.outputs.resourceId}/subnets/aca'
-    internal: false
-    publicNetworkAccess: 'Enabled'
+    internal: true
+    publicNetworkAccess: 'Disabled'
     zoneRedundant: acaZoneRedundant
     workloadProfiles: [
       {
@@ -453,6 +533,16 @@ module environment 'br/public:avm/res/app/managed-environment:0.16.0' = {
         workspaceResourceId: logs.outputs.resourceId
       }
     ]
+  }
+}
+
+module environmentDns 'modules/internal-environment-dns.bicep' = {
+  name: '${stem}-environment-dns'
+  params: {
+    dnsZoneName: environment.outputs.defaultDomain
+    ipv4Address: environment.outputs.staticIp!
+    vnetResourceId: network.outputs.resourceId
+    tags: tags
   }
 }
 
@@ -485,4 +575,12 @@ output sqlServerHost string = sql.outputs.fullyQualifiedDomainName
 output sqlDatabaseName string = databaseName
 output applicationInsightsResourceId string = insights.outputs.resourceId
 output logAnalyticsResourceId string = logs.outputs.resourceId
+output amplsResourceId string = monitorScope.outputs.resourceId
+output virtualNetworkResourceId string = network.outputs.resourceId
+output applicationPrivateDnsZoneResourceId string = environmentDns.outputs.resourceId
+output applicationInternalIpAddress string = environment.outputs.staticIp!
+output monitorPrivateEndpointResourceId string = monitorPrivateEndpoint.outputs.resourceId
+output monitorPrivateDnsZoneResourceIds array = [
+  for zoneName in monitorZoneNames: resourceId('Microsoft.Network/privateDnsZones', zoneName)
+]
 output acaSubnetCidr string = acaSubnetCidr

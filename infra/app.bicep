@@ -161,6 +161,7 @@ module application 'br/public:avm/res/app/container-app:0.23.0' = {
       userAssignedResourceIds: [identity.id]
     }
     activeRevisionsMode: 'Single'
+    // External to the app environment, but reachable only through the internal environment network.
     ingressExternal: true
     ingressAllowInsecure: false
     ingressTargetPort: 8080
