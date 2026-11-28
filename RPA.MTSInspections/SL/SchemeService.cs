@@ -5,14 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using RPA.MTSInspections.ViewModels;
 
 namespace RPA.MTSInspections.SL
 {
     public class SchemeService : ISchemeService
     {
-        MTSInspectionsContext db = new MTSInspectionsContext();
+        private readonly MTSInspectionsContext db;
 
         public SchemeService(MTSInspectionsContext context)
         {
@@ -23,7 +23,7 @@ namespace RPA.MTSInspections.SL
         public List<PlantOption> GetPlantOptions(Guid plantId, Guid schemeId)
         {
 
-            List<PlantOption> plantOptionList = db.PlantOption.Where(x => x.PlantId == plantId && x.SchemeId == schemeId).ToList();
+            List<PlantOption> plantOptionList = db.PlantOption.Include(x => x.Option).ThenInclude(o => o.Criteria).Where(x => x.PlantId == plantId && x.SchemeId == schemeId).ToList();
 
             return plantOptionList;
         }
@@ -37,11 +37,11 @@ namespace RPA.MTSInspections.SL
 
             list.Add(new SelectListItem() { Text = "", Value = null });
 
-            var CriteriaList = db.Criteria.Where(x => x.Name == criteria && x.SchemeId == schemeId).First().Option.Where(x =>x.Active == true).OrderBy(x => x.Score).ThenBy(x => x.Name).ToList();
+            var CriteriaList = db.Criteria.Include(x => x.Option).Where(x => x.Name == criteria && x.SchemeId == schemeId).First().Option.Where(x =>x.Active == true).OrderBy(x => x.Score).ThenBy(x => x.Name).ToList();
 
             foreach (var item in CriteriaList)
             {
-                list.Add(new SelectListItem() { Text = item.Name, Value = item.OptionId.ToString(), Selected = item.OptionId == plantOption?.Option.OptionId });
+                list.Add(new SelectListItem() { Text = item.Name, Value = item.OptionId.ToString(), Selected = item.OptionId == (plantOption?.Option?.OptionId ?? plantOption?.OptionId) });
             }
 
 
@@ -54,7 +54,7 @@ namespace RPA.MTSInspections.SL
         public SelectOption GetCheckOption(Guid plantID, Guid schemeId, string optionName)
         {
 
-            PlantOption currentOption = db.PlantOption.Where(x => x.Option.Name == optionName && x.SchemeId == schemeId && x.PlantId == plantID).FirstOrDefault();
+            PlantOption currentOption = db.PlantOption.Include(x => x.Option).Where(x => x.Option.Name == optionName && x.SchemeId == schemeId && x.PlantId == plantID).FirstOrDefault();
 
             return new SelectOption
             {
@@ -70,11 +70,9 @@ namespace RPA.MTSInspections.SL
         public PlantOption GetCurrentPlantOption(Guid plantID, Guid schemeID, string criteriaName)
         {
 
-            Plant currentPlant = db.Plant.Where(x => x.PlantId == plantID).FirstOrDefault();
-
             Guid currentCriteria = db.Criteria.AsNoTracking().Where(x => x.Name == criteriaName && x.SchemeId == schemeID).Select(x => x.CriteriaId).FirstOrDefault();
 
-            PlantOption currentPlantOption = currentPlant.PlantOptions.Where(x => x.PlantId == plantID && x.SchemeId == schemeID && x.Option?.CriteriaId == currentCriteria).FirstOrDefault();
+            PlantOption currentPlantOption = db.PlantOption.Include(x => x.Option).ThenInclude(o => o.Criteria).Where(x => x.PlantId == plantID && x.SchemeId == schemeID && x.Option.CriteriaId == currentCriteria).FirstOrDefault();
 
 
             return currentPlantOption;
@@ -87,7 +85,7 @@ namespace RPA.MTSInspections.SL
         public PlantOption GetCurrentNoPOption(Guid plantID, Guid schemeID, string optionName)
         {
 
-            return db.PlantOption.Where(x=>x.PlantId == plantID && x.SchemeId == schemeID && x.Option.Name == optionName).FirstOrDefault();
+            return db.PlantOption.Include(x => x.Option).ThenInclude(o => o.Criteria).Where(x=>x.PlantId == plantID && x.SchemeId == schemeID && x.Option.Name == optionName).FirstOrDefault();
         }
 
 

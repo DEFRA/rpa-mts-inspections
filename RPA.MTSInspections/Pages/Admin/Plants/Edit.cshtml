@@ -1,0 +1,109 @@
+@page "/Admin/Edit"
+@model EditModel
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+<div class="col-md-offset-11"><a asp-page="/Admin/Plants/Index">Back</a></div>
+
+<form method="post">
+        <div class="form-horizontal">
+            <h4>Plant</h4>
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.Plant.PlantId)
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Plant.PlantName, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Plant.PlantName, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Plant.PlantName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Plant.AddressOne, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Plant.AddressOne, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Plant.AddressOne, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Plant.AddressTwo, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Plant.AddressTwo, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Plant.AddressTwo, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Plant.TownCity, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Plant.TownCity, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Plant.TownCity, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Plant.County, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Plant.County, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Plant.County, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Plant.PostCode, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Plant.PostCode, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Plant.PostCode, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Plant.LicenceNo, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Plant.LicenceNo, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Plant.LicenceNo, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Plant.Active, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    <div class="checkbox">
+                        @Html.EditorFor(model => model.Plant.Active)
+                        @Html.ValidationMessageFor(model => model.Plant.Active, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <fieldset>
+                <legend>Scheme</legend>
+                <div>
+                    @Html.CheckBoxFor(model => model.Plant.BCC)
+                    <label for="BCC">BCC</label>
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.Plant.BLS)
+                    <label for="BLS">BLS</label>
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.Plant.PCG)
+                    <label for="PCG">PCG</label>
+                </div>
+                <div>
+                    @Html.CheckBoxFor(model => model.Plant.SCC)
+                    <label for="SCC">SCC</label>
+                </div>
+            </fieldset>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+            </div>
+        </div>
+</form>

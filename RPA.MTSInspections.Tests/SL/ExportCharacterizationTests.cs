@@ -5,7 +5,7 @@ using RPA.MTSInspections.DAL;
 using RPA.MTSInspections.Models;
 using RPA.MTSInspections.Services;
 using RPA.MTSInspections.SL;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
 namespace RPA.MTSInspections.Tests.SL
@@ -122,12 +122,9 @@ namespace RPA.MTSInspections.Tests.SL
                 new() { OptionId = Guid.NewGuid(), Name = "Wholesale", Criteria = natureOfOperation }
             };
 
-            var db = new Mock<MTSInspectionsContext>();
-            db.Setup(x => x.Plant).Returns(new Mock<DbSet<Plant>>().SetupData(plants).Object);
-            db.Setup(x => x.Scheme).Returns(new Mock<DbSet<Scheme>>().SetupData(schemes).Object);
-            db.Setup(x => x.Option).Returns(new Mock<DbSet<Option>>().SetupData(options).Object);
+            var db = new TestDb().Seed(plants, schemes, options).NewContext();
 
-            return new ExportService(db.Object, Mock.Of<ISchemeService>(), Mock.Of<IAuditService>(), new FakeUser(),
+            return new ExportService(db, Mock.Of<ISchemeService>(), Mock.Of<IAuditService>(), new FakeUser(),
                 Options.Create(new UploadOptions()));
         }
 

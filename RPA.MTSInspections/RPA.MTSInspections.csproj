@@ -14,10 +14,13 @@
     <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.5.5" />
     <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.6.5" />
     <PackageReference Include="Azure.Identity" Version="1.21.0" />
-    <PackageReference Include="EntityFramework" Version="6.5.2" />
     <PackageReference Include="EPPlus" Version="4.5.3.3" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="3.2.0" />
-    <PackageReference Include="Microsoft.EntityFramework.SqlServer" Version="6.5.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.15">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.15" />
     <PackageReference Include="Microsoft.Identity.Web" Version="4.16.1" />
     <PackageReference Include="System.Drawing.Common" Version="10.0.14" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
@@ -26,16 +29,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="RPA.MTSInspections.Tests" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- Migration that was on disk but never part of the original project -->
-    <Compile Remove="Migrations\201803161004159_plantnamereq.cs" />
-    <Compile Remove="Migrations\201803161004159_plantnamereq.designer.cs" />
-    <EmbeddedResource Remove="Migrations\201803161004159_plantnamereq.resx" />
-    <EmbeddedResource Update="Migrations\*.resx">
-      <DependentUpon>%(Filename).cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

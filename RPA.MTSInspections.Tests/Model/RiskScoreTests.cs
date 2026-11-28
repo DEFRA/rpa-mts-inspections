@@ -1,9 +1,9 @@
-﻿using Moq;
+using Moq;
 using NUnit.Framework;
 using RPA.MTSInspections.Models;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
+
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -60,7 +60,7 @@ namespace RPA.MTSInspections.Tests.Model
             var criteria16 = new Criteria { CriteriaId = Guid.Parse("8A84C06D-F965-4EE1-AE82-544D656D3A94"), Name = "Failed/Unsatisfactory on Last Visit", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 20, Scheme = schemeBCC };
             var criteria17 = new Criteria { CriteriaId = Guid.Parse("93161331-9649-4730-8981-679F4320791E"), Name = "Hide Puller", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 5, Scheme = schemeBCC };
             var criteria18 = new Criteria { CriteriaId = Guid.Parse("FF41ADF1-77BC-4A23-91BD-6AD650A6C6B0"), Name = "Pre Inspection Sign In", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 6, Scheme = schemeBCC };
-            var criteria19 = new Criteria { CriteriaId = Guid.Parse("FF41ADF1-77BC-4A23-91BD-6AD650A6C6B0"), Name = "Operating Hours", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 0, Scheme = schemeBCC };
+            var criteria19 = new Criteria { CriteriaId = Guid.Parse("FF41ADF1-77BC-4A23-91BD-6AD650A6C6B1"), Name = "Operating Hours", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 0, Scheme = schemeBCC };
             var criteria20 = new Criteria { CriteriaId = Guid.Parse("FC46A70A-12D0-4C3F-87FD-976C4FF9616A"), Name = "Line Clearing", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 0, Scheme = schemeBCC };
             var criteria21 = new Criteria { CriteriaId = Guid.Parse("1F9BBA1A-77DE-4C6C-A53E-9BD738F6493A"), Name = "Throughput", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 20, Scheme = schemeBCC };
             var criteria22 = new Criteria { CriteriaId = Guid.Parse("6DE3685D-7BE8-4D32-8C2E-A8628CF5A3FF"), Name = "Number of Weeks Since Last Inspection", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 0, Scheme = schemeBCC };

@@ -1,4 +1,4 @@
-﻿@model List<RPA.MTSInspections.Models.ErrorLog>
+@model List<RPA.MTSInspections.Models.ErrorLog>
 
 @{
     ViewBag.Title = "Error Log";
@@ -6,7 +6,7 @@
 
 <h2>Error List</h2>
 <div class="col-md-offset-11">
-    <p>@Html.ActionLink("Back", "Index", "Export")</p>
+    <p><a asp-page="/Export/Index">Back</a></p>
 </div>
 
 <table class="table">

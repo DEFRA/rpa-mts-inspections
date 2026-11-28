@@ -1,11 +1,11 @@
-﻿using Moq;
+using Moq;
 using NUnit.Framework;
 using RPA.MTSInspections.DAL;
 using RPA.MTSInspections.Models;
 using RPA.MTSInspections.SL;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,8 +16,8 @@ namespace RPA.MTSInspections.Tests.SL
     [Category("Audit Service")]
    public class AuditServiceTest
     {
-        Mock<DbSet<Audit>> mockAuditSet;
-        Mock<MTSInspectionsContext> mockContext;
+        TestDb db;
+        MTSInspectionsContext context;
         AuditService service;
 
         [SetUp]
@@ -32,20 +32,22 @@ namespace RPA.MTSInspections.Tests.SL
 
             //Create mocks for teams repository and setup mocked behaviour to mimic EF using test data above
 
-            mockAuditSet = new Mock<DbSet<Audit>>();
-            mockAuditSet.As<IQueryable<Audit>>().Setup(x => x.Provider).Returns(auditData.Provider);
-            mockAuditSet.As<IQueryable<Audit>>().Setup(x => x.Expression).Returns(auditData.Expression);
-            mockAuditSet.As<IQueryable<Audit>>().Setup(x => x.ElementType).Returns(auditData.ElementType);
-            mockAuditSet.As<IQueryable<Audit>>().Setup(x => x.GetEnumerator()).Returns(auditData.GetEnumerator());
 
             //Setup context and set teams repository to use above mocked object.
-            mockContext = new Mock<MTSInspectionsContext>();
-            mockContext.Setup(x => x.Audit).Returns(mockAuditSet.Object);
+            db = new TestDb().Seed(auditData);
+            context = db.NewContext();
 
 
             //Setup Service Injecting Mocked Context
-            service = new AuditService(mockContext.Object);
+            service = new AuditService(context);
         
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            context?.Dispose();
+            db?.Dispose();
         }
 
         [Test]
@@ -66,7 +68,7 @@ namespace RPA.MTSInspections.Tests.SL
 
             //Assert
 
-            mockAuditSet.Verify(x => x.Add(It.IsAny<Audit>()), Times.Once);
+            Assert.AreEqual(1, context.ChangeTracker.Entries<Audit>().Count(x => x.State == EntityState.Added));
         }
     }
 }

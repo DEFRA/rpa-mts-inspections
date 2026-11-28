@@ -1,0 +1,81 @@
+@page "/Plant/Details/{id:guid?}"
+@model DetailsModel
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2 style="text-align:center">Plant Details</h2>
+
+<div class="col-md-offset-11"><a asp-page="/Plants/Index">Back</a></div>
+
+<div>
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group row">
+        @Html.LabelFor(model => model.Plant.LicenceNo, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-sm-4">
+            @Html.EditorFor(model => model.Plant.LicenceNo, new { htmlAttributes = new { @class = "form-control disableeffects", @readonly = "readonly" } })
+        </div>
+        @Html.LabelFor(model => model.Plant.AddressOne, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-sm-4">
+            @Html.EditorFor(model => model.Plant.AddressOne, new { htmlAttributes = new { @class = "form-control disableeffects", @readonly = "readonly" } })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.LabelFor(model => model.Plant.PlantName, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-sm-4">
+            @Html.EditorFor(model => model.Plant.PlantName, new { htmlAttributes = new { @class = "form-control disableeffects", @readonly = "readonly" } })
+        </div>
+        @Html.LabelFor(model => model.Plant.AddressTwo, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-sm-4">
+            @Html.EditorFor(model => model.Plant.AddressTwo, new { htmlAttributes = new { @class = "form-control disableeffects", @readonly = "readonly" } })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-sm-6">
+
+        </div>
+        @Html.LabelFor(model => model.Plant.TownCity, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-sm-4">
+            @Html.EditorFor(model => model.Plant.TownCity, new { htmlAttributes = new { @class = "form-control disableeffects", @readonly = "readonly" } })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-sm-6">
+
+        </div>
+        @Html.LabelFor(model => model.Plant.County, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-sm-4">
+            @Html.EditorFor(model => model.Plant.County, new { htmlAttributes = new { @class = "form-control disableeffects", @readonly = "readonly" } })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @await Component.InvokeAsync("RiskScore", new { id = Model.Plant.PlantId, scheme = (string)ViewBag.currentScheme })
+        <div class="col-sm-6">
+
+        </div>
+        @Html.LabelFor(model => model.Plant.PostCode, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-sm-4">
+            @Html.EditorFor(model => model.Plant.PostCode, new { htmlAttributes = new { @class = "form-control disableeffects", @readonly = "readonly" } })
+        </div>
+    </div>
+    @Html.HiddenFor(model => model.Plant.PlantId)
+</div>
+
+<hr />
+
+@if (ViewBag.errorList != null)
+{
+    <partial name="~/Views/Scheme/_Errors.cshtml" model="(List<string>)ViewBag.errorList" />
+
+}
+
+@await Component.InvokeAsync("SchemeEdit", new { PlantId = Model.Plant.PlantId, scheme = (string)ViewBag.currentScheme })
+
+

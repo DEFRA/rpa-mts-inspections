@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
 using RPA.MTSInspections.DAL;
@@ -56,6 +57,16 @@ public static class ApplicationServices
 
         // Every unsafe-verb request needs an antiforgery token; forms render one automatically.
         services.AddControllersWithViews(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
+
+        // Legacy MVC URLs (/, /Home, /Plant, /Export, /Admin) keep working as page routes.
+        services.AddRazorPages(options =>
+        {
+            options.Conventions.AddPageRoute("/Home/Index", "");
+            options.Conventions.AddPageRoute("/Home/Index", "Home");
+            options.Conventions.AddPageRoute("/Plants/Index", "Plant");
+            options.Conventions.AddPageRoute("/Export/Index", "Export");
+            options.Conventions.AddPageRoute("/Admin/Index", "Admin");
+        });
 
         services.AddMtsApplicationInsights(configuration);
 
@@ -204,7 +215,8 @@ public static class ApplicationServices
 
     private static void AddData(IServiceCollection services, string connectionString)
     {
-        services.AddScoped(_ => new MTSInspectionsContext(connectionString));
+        services.AddDbContext<MTSInspectionsContext>(options =>
+            options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure()));
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<ICriteriaService, CriteriaService>();
         services.AddScoped<IExportService, ExportService>();

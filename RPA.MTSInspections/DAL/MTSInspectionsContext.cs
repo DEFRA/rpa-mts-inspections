@@ -1,35 +1,19 @@
 using RPA.MTSInspections.Models;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using Microsoft.Data.SqlClient;
 
 namespace RPA.MTSInspections.DAL
 {
-    [DbConfigurationType(typeof(MTSInspectionsDbConfiguration))]
     public class MTSInspectionsContext : DbContext
     {
-        static MTSInspectionsContext()
+        public MTSInspectionsContext(DbContextOptions<MTSInspectionsContext> options)
+            : base(options)
         {
-            // The schema is released separately (DBA / pipeline); the runtime must never create or alter it implicitly.
-            Database.SetInitializer<MTSInspectionsContext>(null);
+            // Updates are marked explicitly (SetModified), as they were with EF6.
+            ChangeTracker.AutoDetectChangesEnabled = false;
         }
-
-        // Required by DbMigrator, which creates the context itself; the migration configuration supplies the real connection.
-        public MTSInspectionsContext()
-            : base("MTSInspectionsContext")
-        {
-            this.Configuration.AutoDetectChangesEnabled = false;
-        }
-
-        // The connection is created explicitly so the Microsoft.Data.SqlClient provider is always used.
-        public MTSInspectionsContext(string connectionString)
-            : base(new SqlConnection(connectionString), true)
-        {
-            this.Configuration.AutoDetectChangesEnabled = false;
-        }
-
         public virtual DbSet<Criteria> Criteria { get; set; }
 
         public virtual DbSet<Option> Option { get; set; }
@@ -47,6 +31,41 @@ namespace RPA.MTSInspections.DAL
         public virtual DbSet<Audit> Audit { get; set; }
 
         public virtual void SetModified(Object obj) { Entry(obj).State = EntityState.Modified; }
+
+        // Table, key and column types match the schema created by the previous EF6 model.
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Scheme>().ToTable("Schemes");
+            modelBuilder.Entity<Criteria>().ToTable("Criteria");
+            modelBuilder.Entity<Option>().ToTable("Options");
+            modelBuilder.Entity<Plant>().ToTable("Plants");
+
+            modelBuilder.Entity<PlantOption>(entity =>
+            {
+                entity.ToTable("PlantOptions");
+                entity.HasKey(x => new { x.PlantId, x.SchemeId, x.OptionId });
+            });
+
+            modelBuilder.Entity<LastInspection>(entity =>
+            {
+                entity.ToTable("LastInspections");
+                entity.HasKey(x => new { x.PlantId, x.SchemeId });
+                entity.Property(x => x.Date).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<RiskScore>(entity =>
+            {
+                entity.ToTable("RiskScores");
+                entity.HasKey(x => new { x.PlantId, x.SchemeId });
+                entity.Property(x => x.DateCalculated).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<Audit>(entity =>
+            {
+                entity.ToTable("Audits");
+                entity.Property(x => x.Date).HasColumnType("datetime");
+            });
+        }
 
 
     }

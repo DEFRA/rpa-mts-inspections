@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Localization;
-using RPA.MTSInspections.Migrations;
+using Microsoft.EntityFrameworkCore;
+using RPA.MTSInspections.DAL;
 using RPA.MTSInspections.Services;
-using System.Data.Entity.Migrations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +29,8 @@ if (builder.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
         throw new InvalidOperationException("ApplyMigrationsOnStartup is only supported in Development; the schema is released separately.");
     }
 
-    new DbMigrator(new Configuration(builder.Configuration.GetConnectionString("MTSInspectionsContext"))).Update();
+    using var scope = app.Services.CreateScope();
+    scope.ServiceProvider.GetRequiredService<MTSInspectionsContext>().Database.Migrate();
 }
 
 if (app.Environment.IsDevelopment())
@@ -61,9 +62,11 @@ app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => fa
 app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") })
     .AllowAnonymous();
 
+app.MapRazorPages();
+
 app.MapControllerRoute(
     name: "Default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller}/{action}/{id?}");
 
 app.Run();
 

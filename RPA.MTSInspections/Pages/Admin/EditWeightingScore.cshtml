@@ -1,0 +1,42 @@
+@page "/Admin/EditWeightingScore/{criteriaId:guid?}"
+@model EditWeightingScoreModel
+
+@{
+    ViewBag.Title = "Edit";
+    var backPage = Model.Criteria.Scheme?.Name switch
+    {
+        "BLS" => "/Admin/Bls/BlsOptions",
+        "BCC" => "/Admin/Bcc/BccOptions",
+        "SCC" => "/Admin/Scc/SccOptions",
+        _ => "/Admin/Pcg/PcgOptions"
+    };
+}
+
+<div class="col-md-offset-11">
+    <a asp-page="@backPage">Back</a>
+</div>
+
+<form method="post">
+    <div class="form-horizontal">
+        <h4>Edit Weighting Score - @Html.DisplayFor(model => model.Criteria.Name)</h4>
+        <hr />
+
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Criteria.CriteriaId)
+        @Html.HiddenFor(model => model.Criteria.SchemeId)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Criteria.Weighting, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Criteria.Weighting, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Criteria.Weighting, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+</form>

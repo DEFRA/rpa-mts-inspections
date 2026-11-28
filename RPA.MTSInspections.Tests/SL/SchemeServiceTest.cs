@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using NUnit.Framework;
 using RPA.MTSInspections.DAL;
 using RPA.MTSInspections.Models;
@@ -6,7 +6,7 @@ using RPA.MTSInspections.SL;
 using RPA.MTSInspections.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,17 +18,11 @@ namespace RPA.MTSInspections.Tests.SL
 
     class SchemeServiceTest
     {
-        Mock<MTSInspectionsContext> mockContext;
+        TestDb db;
+        MTSInspectionsContext context;
         SchemeService service;
         Mock<ISchemeService> Sservice;
         Mock<IAuditService> Aservice;
-        Mock<DbSet<Plant>> mockPlantSet;
-        Mock<DbSet<Scheme>> mockSchemeSet;
-        Mock<DbSet<Criteria>> mockCriteriaSet;
-        Mock<DbSet<Option>> mockOptionSet;
-        Mock<DbSet<PlantOption>> mockPlantOptionSet;
-        Mock<DbSet<RiskScore>> mockRiskScoreSet;
-        Mock<DbSet<LastInspection>> mockLastInspectionSet;
 
 
         [SetUp]
@@ -103,7 +97,7 @@ namespace RPA.MTSInspections.Tests.SL
             var criteria16 = new Criteria { CriteriaId = Guid.Parse("8A84C06D-F965-4EE1-AE82-544D656D3A94"), Name = "Failed/Unsatisfactory on Last Visit", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 20, Scheme = schemeBCC };
             var criteria17 = new Criteria { CriteriaId = Guid.Parse("93161331-9649-4730-8981-679F4320791E"), Name = "Hide Puller", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 5, Scheme = schemeBCC };
             var criteria18 = new Criteria { CriteriaId = Guid.Parse("FF41ADF1-77BC-4A23-91BD-6AD650A6C6B0"), Name = "Pre Inspection Sign In", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 6, Scheme = schemeBCC };
-            var criteria19 = new Criteria { CriteriaId = Guid.Parse("FF41ADF1-77BC-4A23-91BD-6AD650A6C6B0"), Name = "Operating Hours", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 0, Scheme = schemeBCC };
+            var criteria19 = new Criteria { CriteriaId = Guid.Parse("FF41ADF1-77BC-4A23-91BD-6AD650A6C6B1"), Name = "Operating Hours", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 0, Scheme = schemeBCC };
             var criteria20 = new Criteria { CriteriaId = Guid.Parse("FC46A70A-12D0-4C3F-87FD-976C4FF9616A"), Name = "Line Clearing", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 0, Scheme = schemeBCC };
             var criteria21 = new Criteria { CriteriaId = Guid.Parse("1F9BBA1A-77DE-4C6C-A53E-9BD738F6493A"), Name = "Throughput", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 20, Scheme = schemeBCC };
             var criteria22 = new Criteria { CriteriaId = Guid.Parse("6DE3685D-7BE8-4D32-8C2E-A8628CF5A3FF"), Name = "Number of Weeks Since Last Inspection", SchemeId = Guid.Parse("5982F25B-4DDE-483C-B0D3-F2E46A5036B4"), Weighting = 0, Scheme = schemeBCC };
@@ -202,7 +196,7 @@ namespace RPA.MTSInspections.Tests.SL
             var plantOption8 = new PlantOption { PlantId = Guid.Parse("C741904A-5C65-4D12-848D-284BF2D4AF79"), Plant = plant1, SchemeId = Guid.Parse("EE9597C9-9479-4486-8506-1374D7F62A16"), Scheme = schemeBLS, OptionId = Guid.Parse("7510C5EB-EC6B-46F3-9B11-17272C98612F"), Option = option8 };
             var plantOption9 = new PlantOption { PlantId = Guid.Parse("C741904A-5C65-4D12-848D-284BF2D4AF79"), Plant = plant1, SchemeId = Guid.Parse("EE9597C9-9479-4486-8506-1374D7F62A16"), Scheme = schemeBLS, OptionId = Guid.Parse("8E777ED0-2833-4E10-BAC1-0799F05DF26F"), Option = option9 };
             var plantOption10 = new PlantOption { PlantId = Guid.Parse("C741904A-5C65-4D12-848D-284BF2D4AF79"), Plant = plant1, SchemeId = Guid.Parse("EE9597C9-9479-4486-8506-1374D7F62A16"), Scheme = schemeBLS, OptionId = Guid.Parse("BDCAC403-40FB-457B-A809-13CB812401DD"), Option = option10 };
-            var plantOption11 = new PlantOption { PlantId = Guid.Parse("C741904A-5C65-4D12-848D-284BF2D4AF79"), Plant = plant1, SchemeId = Guid.Parse("EE9597C9-9479-4486-8506-1374D7F62A16"), Scheme = schemeBLS, OptionId = Guid.Parse("2B6CE3A6-687D-406E-BBAB-31701F28F33B"), Option = option11 };
+            var plantOption11 = new PlantOption { PlantId = Guid.Parse("C741904A-5C65-4D12-848D-284BF2D4AF79"), Plant = plant1, SchemeId = Guid.Parse("EE9597C9-9479-4486-8506-1374D7F62A16"), Scheme = schemeBLS, OptionId = Guid.Parse("86554B19-8A7F-465B-910F-0461D383D9C2"), Option = option11 };
 
             //BCC Plant Options
 
@@ -274,72 +268,31 @@ namespace RPA.MTSInspections.Tests.SL
 
             //Create mocks for teams repository and setup mocked behaviour to mimic EF using test data above
 
-            mockPlantSet = new Mock<DbSet<Plant>>();
-            mockPlantSet.As<IQueryable<Plant>>().Setup(x => x.Provider).Returns(plantData.Provider);
-            mockPlantSet.As<IQueryable<Plant>>().Setup(x => x.Expression).Returns(plantData.Expression);
-            mockPlantSet.As<IQueryable<Plant>>().Setup(x => x.ElementType).Returns(plantData.ElementType);
-            mockPlantSet.As<IQueryable<Plant>>().Setup(x => x.GetEnumerator()).Returns(plantData.GetEnumerator());
-            mockPlantSet.Setup(x => x.AsNoTracking()).Returns(mockPlantSet.Object);
-            mockPlantSet.Setup(x => x.Include(It.IsAny<string>())).Returns(mockPlantSet.Object);
-
-            mockSchemeSet = new Mock<DbSet<Scheme>>();
-            mockSchemeSet.As<IQueryable<Scheme>>().Setup(x => x.Provider).Returns(schemeData.Provider);
-            mockSchemeSet.As<IQueryable<Scheme>>().Setup(x => x.Expression).Returns(schemeData.Expression);
-            mockSchemeSet.As<IQueryable<Scheme>>().Setup(x => x.ElementType).Returns(schemeData.ElementType);
-            mockSchemeSet.As<IQueryable<Scheme>>().Setup(x => x.GetEnumerator()).Returns(schemeData.GetEnumerator());
-            mockSchemeSet.Setup(x => x.AsNoTracking()).Returns(mockSchemeSet.Object);
-
-            mockCriteriaSet = new Mock<DbSet<Criteria>>();
-            mockCriteriaSet.As<IQueryable<Criteria>>().Setup(x => x.Provider).Returns(criteriaData.Provider);
-            mockCriteriaSet.As<IQueryable<Criteria>>().Setup(x => x.Expression).Returns(criteriaData.Expression);
-            mockCriteriaSet.As<IQueryable<Criteria>>().Setup(x => x.ElementType).Returns(criteriaData.ElementType);
-            mockCriteriaSet.As<IQueryable<Criteria>>().Setup(x => x.GetEnumerator()).Returns(criteriaData.GetEnumerator());
-            mockCriteriaSet.Setup(x => x.AsNoTracking()).Returns(mockCriteriaSet.Object);
-
-            mockOptionSet = new Mock<DbSet<Option>>();
-            mockOptionSet.As<IQueryable<Option>>().Setup(x => x.Provider).Returns(optionData.Provider);
-            mockOptionSet.As<IQueryable<Option>>().Setup(x => x.Expression).Returns(optionData.Expression);
-            mockOptionSet.As<IQueryable<Option>>().Setup(x => x.ElementType).Returns(optionData.ElementType);
-            mockOptionSet.As<IQueryable<Option>>().Setup(x => x.GetEnumerator()).Returns(optionData.GetEnumerator());
-            mockOptionSet.Setup(x => x.AsNoTracking()).Returns(mockOptionSet.Object);
-
-            mockPlantOptionSet = new Mock<DbSet<PlantOption>>();
-            mockPlantOptionSet.As<IQueryable<PlantOption>>().Setup(x => x.Provider).Returns(plantOptionData.Provider);
-            mockPlantOptionSet.As<IQueryable<PlantOption>>().Setup(x => x.Expression).Returns(plantOptionData.Expression);
-            mockPlantOptionSet.As<IQueryable<PlantOption>>().Setup(x => x.ElementType).Returns(plantOptionData.ElementType);
-            mockPlantOptionSet.As<IQueryable<PlantOption>>().Setup(x => x.GetEnumerator()).Returns(plantOptionData.GetEnumerator());
-            mockPlantOptionSet.Setup(x => x.AsNoTracking()).Returns(mockPlantOptionSet.Object);
 
 
-            mockRiskScoreSet = new Mock<DbSet<RiskScore>>();
-            mockRiskScoreSet.As<IQueryable<RiskScore>>().Setup(x => x.Provider).Returns(riskScoreData.Provider);
-            mockRiskScoreSet.As<IQueryable<RiskScore>>().Setup(x => x.Expression).Returns(riskScoreData.Expression);
-            mockRiskScoreSet.As<IQueryable<RiskScore>>().Setup(x => x.ElementType).Returns(riskScoreData.ElementType);
-            mockRiskScoreSet.As<IQueryable<RiskScore>>().Setup(x => x.GetEnumerator()).Returns(riskScoreData.GetEnumerator());
-            mockRiskScoreSet.Setup(x => x.AsNoTracking()).Returns(mockRiskScoreSet.Object);
 
-            mockLastInspectionSet = new Mock<DbSet<LastInspection>>();
-            mockLastInspectionSet.As<IQueryable<LastInspection>>().Setup(x => x.Provider).Returns(lastInspectionDateData.Provider);
-            mockLastInspectionSet.As<IQueryable<LastInspection>>().Setup(x => x.Expression).Returns(lastInspectionDateData.Expression);
-            mockLastInspectionSet.As<IQueryable<LastInspection>>().Setup(x => x.ElementType).Returns(lastInspectionDateData.ElementType);
-            mockLastInspectionSet.As<IQueryable<LastInspection>>().Setup(x => x.GetEnumerator()).Returns(lastInspectionDateData.GetEnumerator());
-            mockLastInspectionSet.Setup(x => x.AsNoTracking()).Returns(mockLastInspectionSet.Object);
+
+
+
+
 
 
             //Setup context and set teams repository to use above mocked object.
-            mockContext = new Mock<MTSInspectionsContext>();
-            mockContext.Setup(x => x.Plant).Returns(mockPlantSet.Object);
-            mockContext.Setup(x => x.Scheme).Returns(mockSchemeSet.Object);
-            mockContext.Setup(x => x.Option).Returns(mockOptionSet.Object);
-            mockContext.Setup(x => x.PlantOption).Returns(mockPlantOptionSet.Object);
-            mockContext.Setup(x => x.LastInspection).Returns(mockLastInspectionSet.Object);
-            mockContext.Setup(x => x.Criteria).Returns(mockCriteriaSet.Object);
+            db = new TestDb().Seed(plantData, schemeData, criteriaData, optionData, plantOptionData, riskScoreData, lastInspectionDateData);
+            context = db.NewContext();
 
             //Setup Service Injecting Mocked Context
             Sservice = new Mock<ISchemeService>();
             Aservice = new Mock<IAuditService>();
-            service = new SchemeService(mockContext.Object);
+            service = new SchemeService(context);
 
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            context?.Dispose();
+            db?.Dispose();
         }
 
         [Test]
@@ -440,7 +393,7 @@ namespace RPA.MTSInspections.Tests.SL
             Assert.IsNotEmpty(result.Date.ToShortDateString());
         }
 
-        //[Test]
+        [Test]
         public void Test_CreateNewPlantOption()
         {
             //Arrange

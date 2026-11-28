@@ -1,15 +1,14 @@
 using Microsoft.Data.SqlClient;
 using NUnit.Framework;
 using RPA.MTSInspections.DAL;
-using RPA.MTSInspections.Migrations;
 using RPA.MTSInspections.Models;
 using RPA.MTSInspections.Services;
-using System.Data.Entity.Migrations;
+using Microsoft.EntityFrameworkCore;
 
 namespace RPA.MTSInspections.Tests.DAL
 {
     /// <summary>
-    /// Runs the EF6 model, the existing migrations and the Microsoft.Data.SqlClient provider against a real SQL
+    /// Runs the EF Core model, the migrations and the Microsoft.Data.SqlClient provider against a real SQL
     /// Server (LocalDB, a scratch database that is dropped afterwards). Skipped when LocalDB is not available.
     /// It proves the provider path works; it cannot prove Azure SQL managed-identity access.
     /// </summary>
@@ -21,6 +20,9 @@ namespace RPA.MTSInspections.Tests.DAL
 
         private string database;
         private string connection;
+
+        private static MTSInspectionsContext NewContext(string connectionString) =>
+            new(new DbContextOptionsBuilder<MTSInspectionsContext>().UseSqlServer(connectionString).Options);
 
         private static void Run(string connectionString, string sql)
         {
@@ -46,7 +48,7 @@ namespace RPA.MTSInspections.Tests.DAL
                 Assert.Ignore("LocalDB is not available: " + exception.Message);
             }
 
-            new DbMigrator(new Configuration(connection)).Update();
+            NewContext(connection).Database.Migrate();
         }
 
         [OneTimeTearDown]
@@ -70,16 +72,15 @@ namespace RPA.MTSInspections.Tests.DAL
         [Test]
         public void The_existing_migrations_apply_and_leave_nothing_pending()
         {
-            Assert.IsEmpty(new DbMigrator(new Configuration(connection)).GetPendingMigrations());
+            Assert.IsEmpty(NewContext(connection).Database.GetPendingMigrations());
         }
 
         [Test]
-        public void The_orphan_migration_stays_excluded()
+        public void The_initial_migration_is_recorded()
         {
-            var applied = new DbMigrator(new Configuration(connection)).GetDatabaseMigrations().ToList();
+            var applied = NewContext(connection).Database.GetAppliedMigrations().ToList();
 
-            Assert.IsFalse(applied.Any(name => name.Contains("201803161004159")));
-            Assert.IsTrue(applied.Any(name => name.Contains("AddSccScheme")));
+            Assert.IsTrue(applied.Any(name => name.Contains("InitialCreate")));
         }
 
         [Test]
@@ -88,7 +89,7 @@ namespace RPA.MTSInspections.Tests.DAL
             var plantId = Guid.NewGuid();
             var schemeId = Guid.NewGuid();
 
-            using (var db = new MTSInspectionsContext(connection))
+            using (var db = NewContext(connection))
             {
                 db.Scheme.Add(new Scheme { SchemeId = schemeId, Name = "TEST", Active = true, Weighting = 1 });
                 db.Plant.Add(new Plant { PlantId = plantId, PlantName = "Provider test plant", LicenceNo = "T-1", Active = true, SCC = true });
@@ -96,7 +97,7 @@ namespace RPA.MTSInspections.Tests.DAL
                 db.SaveChanges();
             }
 
-            using (var db = new MTSInspectionsContext(connection))
+            using (var db = NewContext(connection))
             {
                 var plant = db.Plant.Single(x => x.PlantId == plantId);
                 var audit = db.Audit.Single(x => x.PlantId == plantId);
@@ -126,7 +127,7 @@ namespace RPA.MTSInspections.Tests.DAL
 
                 var script = File.ReadAllText(scriptFile);
                 StringAssert.Contains("CREATE TABLE [dbo].[Plants]", script);
-                StringAssert.Contains("[__MigrationHistory]", script);
+                StringAssert.Contains("[__EFMigrationsHistory]", script);
 
                 foreach (var batch in System.Text.RegularExpressions.Regex.Split(script, @"^\s*GO\s*$", System.Text.RegularExpressions.RegexOptions.Multiline))
                 {
@@ -134,7 +135,7 @@ namespace RPA.MTSInspections.Tests.DAL
                 }
 
                 Assert.AreEqual(Columns(connection), Columns(scratch));
-                Assert.IsEmpty(new DbMigrator(new Configuration(scratch)).GetPendingMigrations());
+                Assert.IsEmpty(NewContext(scratch).Database.GetPendingMigrations());
             }
             finally
             {
@@ -206,7 +207,7 @@ namespace RPA.MTSInspections.Tests.DAL
             command.CommandText =
                 "SELECT t.name + '.' + c.name + ':' + ty.name + ':' + CAST(c.max_length AS varchar) + ':' + CAST(c.is_nullable AS varchar) " +
                 "FROM sys.tables t JOIN sys.columns c ON c.object_id = t.object_id JOIN sys.types ty ON ty.user_type_id = c.user_type_id " +
-                "WHERE t.name <> '__MigrationHistory' ORDER BY t.name, c.name";
+                "WHERE t.name <> '__EFMigrationsHistory' ORDER BY t.name, c.name";
 
             var rows = new List<string>();
             using var reader = command.ExecuteReader();
@@ -220,7 +221,7 @@ namespace RPA.MTSInspections.Tests.DAL
         {
             var missing = "MtsMissing_" + Guid.NewGuid().ToString("N");
 
-            using (var db = new MTSInspectionsContext($"{Server};Database={missing}"))
+            using (var db = NewContext($"{Server};Database={missing}"))
             {
                 Assert.Catch(() => db.Plant.ToList());
             }

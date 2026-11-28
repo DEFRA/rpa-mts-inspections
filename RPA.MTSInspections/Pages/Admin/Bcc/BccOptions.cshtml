@@ -1,0 +1,35 @@
+@page "/Admin/BccOptions"
+@model BccOptionsModel
+
+@{
+    ViewBag.Title = "BccOptions";
+}
+
+<h2>BCC Admin Area</h2>
+
+<div>
+    <div class="col-md-1"> <a asp-page="/Admin/Bcc/BccCreate">Add New</a> </div>
+    <div class="col-md-offset-11"> <a asp-page="/Admin/AdminIndex">Back</a> </div>
+</div>
+
+@{int i = 0;}
+@foreach (var item in Model.CriteriaList)
+{
+    <div class="panel-group" id="accordion_@i">
+        <div class="panel panel-default" id="panel_@i">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-target="#collapseOne_@i" href="#collapseOne_@i">
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseOne_@i" class="panel-collapse collapse">
+                <div class="panel-body">
+                    @await Component.InvokeAsync("OptionPartial", new { criteriaId = item.CriteriaId })
+                </div>
+            </div>
+        </div>
+    </div>
+    i++;
+}

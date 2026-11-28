@@ -1,7 +1,7 @@
 # RPA MTS Inspections
 
 MTS Risk Analysis portal: plant inspection records, scheme criteria and risk scores for the BLS, BCC, PCG and SCC
-schemes. ASP.NET Core MVC on .NET 10 with Entity Framework 6, built to run as a non-root Linux container on Azure
+schemes. ASP.NET Core Razor Pages and MVC on .NET 10 with Entity Framework Core 10, built to run as a non-root Linux container on Azure
 Container Apps (ACA).
 
 **Azure deployment has not been verified.** The code, container definition, Bicep templates, pipeline definition and
@@ -20,7 +20,7 @@ dotnet test .\RPA.MTSInspections.sln -c Release --no-build
 ```
 
 The tests need no Azure, Entra or network access. Sign-in is simulated by a header-based test handler. The
-`SqlServer` category (EF6 provider and the existing migrations) uses a scratch database on SQL Server LocalDB and is
+`SqlServer` category (EF Core SQL Server provider and the `InitialCreate` migration) uses a scratch database on SQL Server LocalDB and is
 skipped when LocalDB is absent: `dotnet test --filter "Category!=SqlServer"` leaves it out.
 
 ## Configuration
@@ -86,7 +86,7 @@ dotnet run --project .\RPA.MTSInspections
 ```
 
 `appsettings.Development.json` supplies a LocalDB connection string and `AllowedHosts=localhost`. The database
-schema must already exist: the application never creates or alters it. For a throw-away local database set
+schema must already exist: the application never creates or alters it. Databases created by the old EF6 model are brought under EF Core with `Database\002_EfCoreBaseline.sql` (it records `InitialCreate` in `__EFMigrationsHistory` without touching the tables); new databases use `--migrate` or `--script`. For a throw-away local database set
 `ApplyMigrationsOnStartup=true` in Development.
 
 ## Container

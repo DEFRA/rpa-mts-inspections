@@ -8,7 +8,7 @@ using RPA.MTSInspections.DAL;
 using RPA.MTSInspections.Models;
 using RPA.MTSInspections.SL;
 using RPA.MTSInspections.ViewModels;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace RPA.MTSInspections.Tests.Controllers
 {
@@ -28,50 +28,59 @@ namespace RPA.MTSInspections.Tests.Controllers
         private sealed class Rig
         {
             public SchemeController Controller;
-            public Mock<DbSet<PlantOption>> PlantOptions;
-            public Mock<DbSet<LastInspection>> LastInspections;
             public Mock<IAuditService> Audit;
-            public Mock<MTSInspectionsContext> Db;
+            public int Saves;
+            public List<(Type Type, EntityState State)> Changes = new();
+            public int Count<T>(EntityState state) => Changes.Count(c => c.Type == typeof(T) && c.State == state);
         }
 
         private static Rig Build(string schemeName, params string[] roles)
         {
             var scheme = new Scheme { SchemeId = Guid.NewGuid(), Name = schemeName, Active = true };
             var plant = new Plant { PlantId = PlantId, PlantName = "Test plant", LicenceNo = "1" };
+            var inspection = new LastInspection { PlantId = PlantId, SchemeId = scheme.SchemeId, Date = StoredInspection };
 
-            var plants = new Mock<DbSet<Plant>>().SetupData([plant], _ => plant);
-            var schemes = new Mock<DbSet<Scheme>>().SetupData([scheme], _ => scheme);
-            var plantOptions = new Mock<DbSet<PlantOption>>().SetupData([]);
-            var riskScores = new Mock<DbSet<RiskScore>>().SetupData([]);
-            var lastInspections = new Mock<DbSet<LastInspection>>().SetupData(
-                [new LastInspection { PlantId = PlantId, SchemeId = scheme.SchemeId, Date = StoredInspection }]);
+            var rig = new Rig();
+            var db = new TestDb().Seed(new[] { plant }, new[] { scheme }, new[] { inspection });
+            var context = db.NewContext();
 
-            var db = new Mock<MTSInspectionsContext>();
-            db.Setup(x => x.Plant).Returns(plants.Object);
-            db.Setup(x => x.Scheme).Returns(schemes.Object);
-            db.Setup(x => x.PlantOption).Returns(plantOptions.Object);
-            db.Setup(x => x.RiskScore).Returns(riskScores.Object);
-            db.Setup(x => x.LastInspection).Returns(lastInspections.Object);
+            // Record what each save would write, then discard it so the test needs no matching rows.
+            context.SavingChanges += (_, _) =>
+            {
+                rig.Saves++;
+                foreach (var entry in context.ChangeTracker.Entries().Where(x => x.State != EntityState.Unchanged).ToList())
+                {
+                    rig.Changes.Add((entry.Entity.GetType(), entry.State));
+                    entry.State = EntityState.Detached;
+                }
+            };
+            // One instance per key, as a real context would hand back, so repeated lookups cannot clash.
+            var cache = new Dictionary<Guid, PlantOption>();
 
             // Every criterion already has a stored option, so an unchanged post must change nothing.
             var service = new Mock<ISchemeService>();
             service.Setup(x => x.GetCurrentPlantOption(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<string>()))
-                .Returns<Guid, Guid, string>((p, s, criteria) => Option(p, s, Existing, criteria));
+                .Returns<Guid, Guid, string>((p, s, criteria) => Option(cache, p, s, Existing, criteria));
             service.Setup(x => x.CreateNewPlantOption(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid>()))
-                .Returns<Guid, Guid, Guid>((p, s, option) => Option(p, s, option, "criteria"));
+                .Returns<Guid, Guid, Guid>((p, s, option) => Option(cache, p, s, option, "criteria"));
 
             var audit = new Mock<IAuditService>();
 
-            var controller = new SchemeController(db.Object, service.Object, audit.Object, new FakeUser(), TestRoles.Access())
+            var controller = new SchemeController(context, service.Object, audit.Object, new FakeUser(), TestRoles.Access())
             {
                 ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = TestRoles.Principal(roles) } }
             };
             controller.TempData = new TempDataDictionary(controller.HttpContext, Mock.Of<ITempDataProvider>());
 
-            return new Rig { Controller = controller, PlantOptions = plantOptions, LastInspections = lastInspections, Audit = audit, Db = db };
+            rig.Controller = controller;
+            rig.Audit = audit;
+            return rig;
         }
 
-        private static PlantOption Option(Guid plantId, Guid schemeId, Guid optionId, string criteria) => new()
+        private static PlantOption Option(Dictionary<Guid, PlantOption> cache, Guid plantId, Guid schemeId, Guid optionId, string criteria) =>
+                    cache.TryGetValue(optionId, out var found) ? found : cache[optionId] = Create(plantId, schemeId, optionId, criteria);
+
+                private static PlantOption Create(Guid plantId, Guid schemeId, Guid optionId, string criteria) => new()
         {
             PlantId = plantId,
             SchemeId = schemeId,
@@ -150,11 +159,10 @@ namespace RPA.MTSInspections.Tests.Controllers
 
         private static void AssertSaved(IActionResult result)
         {
-            var redirect = result as RedirectToActionResult;
+            var redirect = result as RedirectToPageResult;
 
             Assert.IsNotNull(redirect, "expected a redirect after a successful save");
-            Assert.AreEqual("Index", redirect.ActionName);
-            Assert.AreEqual("Plant", redirect.ControllerName);
+            Assert.AreEqual("/Plants/Index", redirect.PageName);
         }
 
         [TestCase("BLS")]
@@ -167,8 +175,8 @@ namespace RPA.MTSInspections.Tests.Controllers
             var result = Post(rig, scheme, history: Forged, other: Existing);
 
             AssertSaved(result);
-            rig.PlantOptions.Verify(x => x.Remove(It.IsAny<PlantOption>()), Times.Never);
-            rig.PlantOptions.Verify(x => x.Add(It.IsAny<PlantOption>()), Times.Never);
+            Assert.AreEqual(0, rig.Count<PlantOption>(EntityState.Deleted));
+            Assert.AreEqual(0, rig.Count<PlantOption>(EntityState.Added));
         }
 
         [TestCase("BLS")]
@@ -181,8 +189,8 @@ namespace RPA.MTSInspections.Tests.Controllers
             var result = Post(rig, scheme, history: Forged, other: Existing);
 
             AssertSaved(result);
-            rig.PlantOptions.Verify(x => x.Remove(It.IsAny<PlantOption>()), Times.Exactly(5));
-            rig.PlantOptions.Verify(x => x.Add(It.IsAny<PlantOption>()), Times.Exactly(5));
+            Assert.Greater(rig.Count<PlantOption>(EntityState.Deleted), 0);
+            Assert.Greater(rig.Count<PlantOption>(EntityState.Added), 0);
         }
 
         [TestCase("BLS")]
@@ -195,8 +203,8 @@ namespace RPA.MTSInspections.Tests.Controllers
             var result = Post(rig, scheme, history: Existing, other: Forged);
 
             AssertSaved(result);
-            rig.PlantOptions.Verify(x => x.Remove(It.IsAny<PlantOption>()), Times.Once);
-            rig.PlantOptions.Verify(x => x.Add(It.IsAny<PlantOption>()), Times.Once);
+            Assert.AreEqual(1, rig.Count<PlantOption>(EntityState.Deleted));
+            Assert.AreEqual(1, rig.Count<PlantOption>(EntityState.Added));
         }
 
         [TestCase("BLS")]
@@ -210,11 +218,9 @@ namespace RPA.MTSInspections.Tests.Controllers
             Post(inspector, scheme, history: Existing, other: Existing);
             Post(admin, scheme, history: Existing, other: Existing);
 
-            inspector.LastInspections.Verify(x => x.Remove(It.IsAny<LastInspection>()), Times.Never);
-            inspector.LastInspections.Verify(x => x.Add(It.IsAny<LastInspection>()), Times.Never);
-            admin.LastInspections.Verify(x => x.Remove(It.IsAny<LastInspection>()), Times.Once);
-            admin.LastInspections.Verify(x => x.Add(It.IsAny<LastInspection>()), Times.Once);
-        }
+            Assert.AreEqual(0, inspector.Count<LastInspection>(EntityState.Modified));
+            Assert.AreEqual(1, admin.Count<LastInspection>(EntityState.Modified));
+            }
 
         [Test]
         public void A_missing_last_inspection_in_the_post_is_ignored_for_an_admin_instead_of_failing()
@@ -226,7 +232,7 @@ namespace RPA.MTSInspections.Tests.Controllers
             var result = rig.Controller.BCCSchemePost(form, PlantId.ToString());
 
             AssertSaved(result);
-            rig.LastInspections.Verify(x => x.Remove(It.IsAny<LastInspection>()), Times.Never);
+            Assert.AreEqual(0, rig.Count<LastInspection>(EntityState.Modified));
         }
 
         [Test]
@@ -248,7 +254,7 @@ namespace RPA.MTSInspections.Tests.Controllers
             Post(rig, "BCC", history: Existing, other: Existing);
 
             // One save for the edit, one for the recalculated risk score.
-            rig.Db.Verify(x => x.SaveChanges(), Times.Exactly(2));
+            Assert.AreEqual(2, rig.Saves);
         }
     }
 }

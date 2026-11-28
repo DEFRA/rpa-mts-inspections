@@ -160,7 +160,7 @@ namespace RPA.MTSInspections.Tests.Pipeline
 
         // Forms still render an antiforgery token, so the global check does not break existing screens
 
-        [TestCase("/Plant", Basic)]
+        // The plant search form is a GET form, so it needs no token
         [TestCase("/Admin/AdminIndex", Admin)]
         [TestCase("/Export/Index", Support)]
         [TestCase("/Account/SignOut", Basic)]

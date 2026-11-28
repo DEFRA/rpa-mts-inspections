@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RPA.MTSInspections.DAL;
+using Microsoft.EntityFrameworkCore;
 using RPA.MTSInspections.Models;
 
 namespace RPA.MTSInspections.ViewComponents
@@ -17,7 +18,7 @@ namespace RPA.MTSInspections.ViewComponents
 
         public IViewComponentResult Invoke(Guid criteriaId)
         {
-            List<Option> options = db.Option.Where(x => x.CriteriaId == criteriaId && x.Active == true).ToList();
+            List<Option> options = db.Option.Include(x => x.Criteria).ThenInclude(c => c.Scheme).Where(x => x.CriteriaId == criteriaId && x.Active == true).ToList();
 
             ViewBag.criteriaId = criteriaId;
 

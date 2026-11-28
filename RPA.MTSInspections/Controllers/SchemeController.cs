@@ -5,7 +5,7 @@ using RPA.MTSInspections.SL;
 using RPA.MTSInspections.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -42,7 +42,7 @@ namespace RPA.MTSInspections.Controllers
         {
             RiskScoreUpdateCalculation(plantID, schemeID);
 
-            return RedirectToAction("Index", "Plant", new { area = "" });
+            return RedirectToPage("/Plants/Index");
         }
 
         // POST: post action for update to BLS Scheme
@@ -629,8 +629,8 @@ namespace RPA.MTSInspections.Controllers
                     if (lastInspectionDate.Date.Date != newLastInspectionDate.Date.Date)
                     {
                         auditService.Log(currentPlant.PlantId, currentUser, currentScheme.Name, "Date of Last Initial Inspection", lastInspectionDate.Date.ToShortDateString(), newLastInspectionDate.Date.ToShortDateString());
-                        db.LastInspection.Remove(lastInspectionDate);
-                        db.LastInspection.Add(newLastInspectionDate);
+                        lastInspectionDate.Date = newLastInspectionDate.Date;
+                        db.SetModified(lastInspectionDate);
                     }
                 }
             }
@@ -638,7 +638,7 @@ namespace RPA.MTSInspections.Controllers
             {
                 TempData["errorList"] = errorList;
 
-                return RedirectToAction("Details", "Plant", new { id = plantID, scheme = currentScheme.Name });
+                return RedirectToPage("/Plants/Details", new { id = plantID, scheme = currentScheme.Name });
             }
             else
             {
@@ -1145,8 +1145,8 @@ namespace RPA.MTSInspections.Controllers
                 if (lastInspectionDate.Date.Date != newLastInspectionDate.Date.Date)
                 {
                     auditService.Log(currentPlant.PlantId, currentUser, currentScheme.Name, "Date of Last Inspection", lastInspectionDate.Date.ToShortDateString(), newLastInspectionDate.Date.ToShortDateString());
-                    db.LastInspection.Remove(lastInspectionDate);
-                    db.LastInspection.Add(newLastInspectionDate);
+                    lastInspectionDate.Date = newLastInspectionDate.Date;
+                    db.SetModified(lastInspectionDate);
                 }
             }
 
@@ -1154,7 +1154,7 @@ namespace RPA.MTSInspections.Controllers
             {
                 TempData["errorList"] = errorList;
 
-                return RedirectToAction("Details", "Plant", new { id = plantID, scheme = currentScheme.Name });
+                return RedirectToPage("/Plants/Details", new { id = plantID, scheme = currentScheme.Name });
             }
             else
             {
@@ -1633,8 +1633,8 @@ namespace RPA.MTSInspections.Controllers
                 if (lastInspectionDate.Date.Date != newLastInspectionDate.Date.Date)
                 {
                     auditService.Log(currentPlant.PlantId, currentUser, currentScheme.Name, "Date of Last Inspection", lastInspectionDate.Date.ToShortDateString(), newLastInspectionDate.Date.ToShortDateString());
-                    db.LastInspection.Remove(lastInspectionDate);
-                    db.LastInspection.Add(newLastInspectionDate);
+                    lastInspectionDate.Date = newLastInspectionDate.Date;
+                    db.SetModified(lastInspectionDate);
 
                 }
             }
@@ -1643,7 +1643,7 @@ namespace RPA.MTSInspections.Controllers
             {
                 TempData["errorList"] = errorList;
 
-                return RedirectToAction("Details", "Plant", new { id = plantID, scheme = currentScheme.Name });
+                return RedirectToPage("/Plants/Details", new { id = plantID, scheme = currentScheme.Name });
             }
             else
             {
@@ -2097,7 +2097,7 @@ namespace RPA.MTSInspections.Controllers
             {
                 TempData["errorList"] = errorList;
                 
-                return RedirectToAction("Details", "Plant", new { id = plantID, scheme = currentScheme.Name });
+                return RedirectToPage("/Plants/Details", new { id = plantID, scheme = currentScheme.Name });
             }
             else
             {
@@ -2116,7 +2116,7 @@ namespace RPA.MTSInspections.Controllers
             RiskScoreUpdateCalculation(plantIDPass, schemeIDPass);
 
 
-            return RedirectToAction("Index", "Plant", new { area = "" });
+            return RedirectToPage("/Plants/Index");
 
 
 
@@ -2151,7 +2151,7 @@ namespace RPA.MTSInspections.Controllers
                 }
             }
 
-            return RedirectToAction("Index", "Admin", new { area = "" });
+            return RedirectToPage("/Admin/Index");
 
 
         }
@@ -2166,7 +2166,7 @@ namespace RPA.MTSInspections.Controllers
             if (currentScheme.Name == "BLS")
             {
                 BlsRiskCalculation blsRiskCalculation = new BlsRiskCalculation();
-                List<PlantOption> blsPlantOps = db.PlantOption.Where(x => x.PlantId == plantIDPass && x.SchemeId == currentScheme.SchemeId).ToList();
+                List<PlantOption> blsPlantOps = db.PlantOption.Include(x => x.Option).ThenInclude(o => o.Criteria).Where(x => x.PlantId == plantIDPass && x.SchemeId == currentScheme.SchemeId).ToList();
 
                 int riskScoreInt = blsRiskCalculation.Calculation(blsPlantOps);
 
@@ -2188,8 +2188,9 @@ namespace RPA.MTSInspections.Controllers
                 else
                 {
                     auditService.Log(plantIDPass, currentUser, currentScheme.Name, "Risk Score", existingRiskScore.Score.ToString(), newriskScore.Score.ToString());
-                    db.RiskScore.Remove(existingRiskScore);
-                    db.RiskScore.Add(newriskScore);
+                    existingRiskScore.Score = newriskScore.Score;
+                    existingRiskScore.DateCalculated = newriskScore.DateCalculated;
+                    db.SetModified(existingRiskScore);
                 }
 
                 db.SaveChanges();
@@ -2198,7 +2199,7 @@ namespace RPA.MTSInspections.Controllers
             if (currentScheme.Name == "BCC")
             {
                 BccRiskCalculation bccRiskCalculation = new BccRiskCalculation();
-                List<PlantOption> bccPlantOps = db.PlantOption.Where(x => x.PlantId == plantIDPass && x.SchemeId == currentScheme.SchemeId).ToList();
+                List<PlantOption> bccPlantOps = db.PlantOption.Include(x => x.Option).ThenInclude(o => o.Criteria).Where(x => x.PlantId == plantIDPass && x.SchemeId == currentScheme.SchemeId).ToList();
 
                 int riskScoreInt = bccRiskCalculation.Calculation(bccPlantOps);
 
@@ -2220,8 +2221,9 @@ namespace RPA.MTSInspections.Controllers
                 else
                 {
                     auditService.Log(plantIDPass, currentUser, currentScheme.Name, "Risk Score", existingRiskScore.Score.ToString(), newriskScore.Score.ToString());
-                    db.RiskScore.Remove(existingRiskScore);
-                    db.RiskScore.Add(newriskScore);
+                    existingRiskScore.Score = newriskScore.Score;
+                    existingRiskScore.DateCalculated = newriskScore.DateCalculated;
+                    db.SetModified(existingRiskScore);
                 }
 
                 db.SaveChanges();
@@ -2230,7 +2232,7 @@ namespace RPA.MTSInspections.Controllers
             if (currentScheme.Name == "PCG")
             {
                 PcgRiskCalculation pcgRiskCalculation = new PcgRiskCalculation();
-                List<PlantOption> pcgPlantOps = db.PlantOption.Where(x => x.PlantId == plantIDPass && x.SchemeId == currentScheme.SchemeId).ToList();
+                List<PlantOption> pcgPlantOps = db.PlantOption.Include(x => x.Option).ThenInclude(o => o.Criteria).Where(x => x.PlantId == plantIDPass && x.SchemeId == currentScheme.SchemeId).ToList();
 
                 int riskScoreInt = pcgRiskCalculation.Calculation(pcgPlantOps);
 
@@ -2252,8 +2254,9 @@ namespace RPA.MTSInspections.Controllers
                 else
                 {
                     auditService.Log(plantIDPass, currentUser, currentScheme.Name, "Risk Score", existingRiskScore.Score.ToString(), newriskScore.Score.ToString());
-                    db.RiskScore.Remove(existingRiskScore);
-                    db.RiskScore.Add(newriskScore);
+                    existingRiskScore.Score = newriskScore.Score;
+                    existingRiskScore.DateCalculated = newriskScore.DateCalculated;
+                    db.SetModified(existingRiskScore);
                 }
 
                 db.SaveChanges();
@@ -2262,7 +2265,7 @@ namespace RPA.MTSInspections.Controllers
             if (currentScheme.Name == "SCC")
             {
                 SccRiskCalculation calculator = new SccRiskCalculation();
-                List<PlantOption> pcgPlantOps = db.PlantOption.Where(x => x.PlantId == plantIDPass && x.SchemeId == currentScheme.SchemeId).ToList();
+                List<PlantOption> pcgPlantOps = db.PlantOption.Include(x => x.Option).ThenInclude(o => o.Criteria).Where(x => x.PlantId == plantIDPass && x.SchemeId == currentScheme.SchemeId).ToList();
 
                 int riskScoreInt = calculator.Calculation(pcgPlantOps);
 
@@ -2284,8 +2287,9 @@ namespace RPA.MTSInspections.Controllers
                 else
                 {
                     auditService.Log(plantIDPass, currentUser, currentScheme.Name, "Risk Score", existingRiskScore.Score.ToString(), newriskScore.Score.ToString());
-                    db.RiskScore.Remove(existingRiskScore);
-                    db.RiskScore.Add(newriskScore);
+                    existingRiskScore.Score = newriskScore.Score;
+                    existingRiskScore.DateCalculated = newriskScore.DateCalculated;
+                    db.SetModified(existingRiskScore);
                 }
 
                 db.SaveChanges();

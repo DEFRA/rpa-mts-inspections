@@ -20,21 +20,6 @@ namespace RPA.MTSInspections.Controllers
             this.ExportService = exportService;
         }
 
-        // GET: Export
-        [Authorize(Policy = MtsPolicies.SupportOrAdmin)]
-        public IActionResult Index(bool? upload)
-        {
-            var myCollection = ExportService.GetMyCollection();
-
-            ViewBag.MyCustomCollection = myCollection;
-
-            if (upload == true)
-            {
-                ViewBag.UploadSuccess = upload;
-            }
-            return View();
-        }
-
         //POST: Return Requested Export CSV
 
         [HttpPost]
@@ -77,7 +62,7 @@ namespace RPA.MTSInspections.Controllers
             {
 
 
-                return RedirectToAction("Index", new { upload = true });
+                return RedirectToPage("/Export/Index", new { upload = true });
             }
             else
             {

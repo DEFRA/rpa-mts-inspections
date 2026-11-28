@@ -31,10 +31,10 @@
                     <span class="icon-bar"></span>
                 </button>
                 
-                <div style="margin-top:7px"><a asp-controller="Home" asp-action="Index" class="navbar-brand">MTS Risk Analysis</a></div>
+                <div style="margin-top:7px"><a asp-page="/Home/Index" class="navbar-brand">MTS Risk Analysis</a></div>
                 </div>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="@Url.Action("Index", "Home")" class="btn btn-default btn-black"> <span class="glyphicon glyphicon-home white" aria-hidden="true"></span> </a></li>
+                <li><a href="@Url.Page("/Home/Index")" class="btn btn-default btn-black"> <span class="glyphicon glyphicon-home white" aria-hidden="true"></span> </a></li>
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <li><a asp-controller="Account" asp-action="SignOut" class="btn btn-default btn-black">Sign out</a></li>

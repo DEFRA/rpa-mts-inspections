@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 using OfficeOpenXml;
 using RPA.MTSInspections.Services;
@@ -93,7 +93,7 @@ namespace RPA.MTSInspections.SL
             {
                 case "1": //"BLS - Download List of All Plants"
 
-                    plantList = db.Plant.AsNoTracking().Where(x => x.BLS).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.BLS).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).AsSplitQuery().ToList();
 
                     //Write Headers
 
@@ -120,7 +120,7 @@ namespace RPA.MTSInspections.SL
 
                 case "2": //"BLS - Download List of All Plants (Active Plants Only)"
 
-                    plantList = db.Plant.AsNoTracking().Where(x => x.BLS).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.BLS).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).AsSplitQuery().ToList();
 
                     //Write Headers
 
@@ -148,7 +148,7 @@ namespace RPA.MTSInspections.SL
 
                 case "3": //"BLS - Download List of All Plants and Data"
 
-                    plantList = db.Plant.AsNoTracking().Where(x => x.BLS).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.BLS).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).Include(x => x.LastInspection).AsSplitQuery().ToList();
 
                     //Write Headers
 
@@ -224,7 +224,7 @@ namespace RPA.MTSInspections.SL
                 case "4": //"BLS - Download List of All Plants and Data (Active Plants Only)"
 
                     //Write Headers
-                    plantList = db.Plant.AsNoTracking().Where(x => x.BLS).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.BLS).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).Include(x => x.LastInspection).AsSplitQuery().ToList();
 
                     writer.Write(string.Format("\"{0}\",\"{1}\",\"{2}\",\"{3}\",\"{4}\",\"{5}\",\"{6}\",\"{7}\",\"{8}\",\"{9}\",\"{10}\",\"{11}\",\"{12}\",\"{13}\",\"{14}\",\"{15}\",\"{16}\",\"{17}\",\"{18}\",\"{19}\"", "Licence No", "Plant Name", "Address Line 1", "Address Line 2", "Town/City", "County", "Post Code", "Active", "Risk Score", "Scheme Year", "Date of Last Inspection", "Number of Months Since Last Inspection", "Number of Failed Inspections", "Number of Non-Compliance", "Severity of Non-Compliance", "Throughput", "Operation Hours", "Premises Type", "Type of Operation", "Origin of Products Handled"));
 
@@ -300,7 +300,7 @@ namespace RPA.MTSInspections.SL
                 case "5": //"BCC - Download List of All Plants"
 
                     //Write Headers
-                    plantList = db.Plant.AsNoTracking().Where(x => x.BCC).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.BCC).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).AsSplitQuery().ToList();
 
                     writer.WriteLine(string.Format("\"{0}\",\"{1}\",\"{2}\",\"{3}\",\"{4}\",\"{5}\",\"{6}\",\"{7}\",\"{8}\",\"{9}\"", "Licence No", "Plant Name", "Address Line 1", "Address Line 2", "Town/City", "County", "Post Code", "Scheme Year", "Risk Score", "Active"));
 
@@ -326,7 +326,7 @@ namespace RPA.MTSInspections.SL
                 case "6": //"BCC - Download List of All Plants (Active Plants Only)"
 
                     //Write Headers
-                    plantList = db.Plant.AsNoTracking().Where(x => x.BCC).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.BCC).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).AsSplitQuery().ToList();
 
                     writer.WriteLine(string.Format("\"{0}\",\"{1}\",\"{2}\",\"{3}\",\"{4}\",\"{5}\",\"{6}\",\"{7}\",\"{8}\",\"{9}\"", "Licence No", "Plant Name", "Address Line 1", "Address Line 2", "Town/City", "County", "Post Code", "Scheme Year", "Risk Score", "Active"));
 
@@ -351,7 +351,7 @@ namespace RPA.MTSInspections.SL
 
                 case "7": //"BCC - Download List of All Plants and Data"
 
-                    plantList = db.Plant.AsNoTracking().Where(x => x.BCC).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.BCC).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).Include(x => x.LastInspection).AsSplitQuery().ToList();
 
                     //Write Headers
 
@@ -410,7 +410,7 @@ namespace RPA.MTSInspections.SL
 
                 case "8": //"BCC - Download List of All Plants and Data (Active Plants Only)"
 
-                    plantList = db.Plant.AsNoTracking().Where(x => x.BCC).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.BCC).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).Include(x => x.LastInspection).AsSplitQuery().ToList();
 
                     //Write Headers
 
@@ -470,7 +470,7 @@ namespace RPA.MTSInspections.SL
                 case "9": //"PCG - Download List of All Plants"
 
                     //Write Headers
-                    plantList = db.Plant.AsNoTracking().Where(x => x.PCG).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.PCG).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).AsSplitQuery().ToList();
 
                     writer.WriteLine(string.Format("\"{0}\",\"{1}\",\"{2}\",\"{3}\",\"{4}\",\"{5}\",\"{6}\",\"{7}\",\"{8}\",\"{9}\"", "Licence No", "Plant Name", "Address Line 1", "Address Line 2", "Town/City", "County", "Post Code", "Scheme Year", "Risk Score", "Active"));
 
@@ -497,7 +497,7 @@ namespace RPA.MTSInspections.SL
                 case "10": //"PCG - Download List of All Plants (Active Plants Only)"
 
                     //Write Headers
-                    plantList = db.Plant.AsNoTracking().Where(x => x.PCG).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.PCG).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).AsSplitQuery().ToList();
 
                     writer.WriteLine(string.Format("\"{0}\",\"{1}\",\"{2}\",\"{3}\",\"{4}\",\"{5}\",\"{6}\",\"{7}\",\"{8}\",\"{9}\"", "Licence No", "Plant Name", "Address Line 1", "Address Line 2", "Town/City", "County", "Post Code", "Scheme Year", "Risk Score", "Active"));
 
@@ -523,7 +523,7 @@ namespace RPA.MTSInspections.SL
                 case "11": //"PCG - Download List of All Plants and Data"
 
                     //Write Headers
-                    plantList = db.Plant.AsNoTracking().Where(x => x.PCG).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.PCG).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).Include(x => x.LastInspection).AsSplitQuery().ToList();
 
                     writer.WriteLine(string.Format("\"{0}\",\"{1}\",\"{2}\",\"{3}\",\"{4}\",\"{5}\",\"{6}\",\"{7}\",\"{8}\",\"{9}\",\"{10}\",\"{11}\",\"{12}\",\"{13}\",\"{14}\",\"{15}\",\"{16}\",\"{17}\",\"{18}\",\"{19}\",\"{20}\",\"{21}\",\"{22}\",\"{23}\"", "Licence No", "Plant Name", "Address Line 1", "Address Line 2", "Town/City", "County", "Post Code", "Active", "Risk Score", "Scheme Year", "Date of Last Inspection", "Number of Weeks Since Last Inspection", "Failed/Unsatisfactory on Last Visit", "Number of Failed/Unsatisfactory in Previous 3 Years", "Number of Near Misses in Previous 3 Years", "Throughput", "Operating Hours", "Pre Inspection Sign In", "Carcass Dressing", "Source of Classifiers", "Line Clearing", "Record Keeping", "Trimming", "Probe"));
 
@@ -579,7 +579,7 @@ namespace RPA.MTSInspections.SL
 
                 case "12": //"PCG - Download List of All Plants and Data (Active Plants Only)"
 
-                    plantList = db.Plant.AsNoTracking().Where(x => x.PCG).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.PCG).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).Include(x => x.LastInspection).AsSplitQuery().ToList();
 
                     //Write Headers
 
@@ -633,7 +633,7 @@ namespace RPA.MTSInspections.SL
 
                 case "13": //"SCC - Download List of All Plants"
 
-                    plantList = db.Plant.AsNoTracking().Where(x => x.SCC).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.SCC).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).AsSplitQuery().ToList();
 
                     //Write Headers
 
@@ -661,7 +661,7 @@ namespace RPA.MTSInspections.SL
 
                 case "14": //"SCC - Download List of All Plants (Active Plants Only)"
 
-                    plantList = db.Plant.AsNoTracking().Where(x => x.SCC).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.SCC).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).AsSplitQuery().ToList();
 
                     //Write Headers
 
@@ -688,7 +688,7 @@ namespace RPA.MTSInspections.SL
 
                 case "15": //"SCC - Download List of All Plants and Data"
 
-                    plantList = db.Plant.AsNoTracking().Where(x => x.SCC).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.SCC).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).Include(x => x.LastInspection).AsSplitQuery().ToList();
 
                     //Write Headers
 
@@ -744,7 +744,7 @@ namespace RPA.MTSInspections.SL
 
                 case "16": //"SCC - Download List of All Plants and Data (Active Plants Only)"
 
-                    plantList = db.Plant.AsNoTracking().Where(x => x.SCC).Include(x => x.PlantOptions).Include(x => x.RiskScore).ToList();
+                    plantList = db.Plant.AsNoTracking().Where(x => x.SCC).Include(x => x.PlantOptions).ThenInclude(po => po.Option).ThenInclude(o => o.Criteria).Include(x => x.PlantOptions).ThenInclude(po => po.Scheme).Include(x => x.RiskScore).Include(x => x.LastInspection).AsSplitQuery().ToList();
 
                     //Write Headers
 
@@ -1104,9 +1104,12 @@ namespace RPA.MTSInspections.SL
 
                             else
                             {
-                                auditService.Log(plantToUpdate.PlantId, UserHelper.CurrentUser(), currentScheme.Name, "Last Inspection Date", lastInspectionDate.Date.ToShortDateString(), newLastInspectionDate.Date.ToShortDateString());
-                                db.LastInspection.Remove(lastInspectionDate);
-                                db.LastInspection.Add(newLastInspectionDate);
+                                if (lastInspectionDate.Date != newLastInspectionDate.Date)
+                                {
+                                    auditService.Log(plantToUpdate.PlantId, UserHelper.CurrentUser(), currentScheme.Name, "Last Inspection Date", lastInspectionDate.Date.ToShortDateString(), newLastInspectionDate.Date.ToShortDateString());
+                                    lastInspectionDate.Date = newLastInspectionDate.Date;
+                                    db.SetModified(lastInspectionDate);
+                                }
                             }
                         }
                         else
@@ -1153,7 +1156,6 @@ namespace RPA.MTSInspections.SL
                                 if (failedVisitOption.OptionId != newFVOption.OptionId)
                                 {
                                     auditService.Log(plantToUpdate.PlantId, UserHelper.CurrentUser(), currentScheme.Name, failedVisitOption.Option.Criteria.Name, failedVisitOption.Option.Name, newFVOption.Name);
-                                    db.PlantOption.Attach(failedVisitOption);
                                     db.PlantOption.Remove(failedVisitOption);
                                     db.PlantOption.Add(newFVPlantOption);
                                 }
@@ -1397,9 +1399,12 @@ namespace RPA.MTSInspections.SL
 
                             else
                             {
-                                auditService.Log(plantToUpdate.PlantId, UserHelper.CurrentUser(), currentScheme.Name, "Last Inspection Date", lastInspectionDate.Date.ToShortDateString(), newLastInspectionDate.Date.ToShortDateString());
-                                db.LastInspection.Remove(lastInspectionDate);
-                                db.LastInspection.Add(newLastInspectionDate);
+                                if (lastInspectionDate.Date != newLastInspectionDate.Date)
+                                {
+                                    auditService.Log(plantToUpdate.PlantId, UserHelper.CurrentUser(), currentScheme.Name, "Last Inspection Date", lastInspectionDate.Date.ToShortDateString(), newLastInspectionDate.Date.ToShortDateString());
+                                    lastInspectionDate.Date = newLastInspectionDate.Date;
+                                    db.SetModified(lastInspectionDate);
+                                }
                             }
                         }
                         else
@@ -1688,9 +1693,12 @@ namespace RPA.MTSInspections.SL
 
                             else
                             {
-                                auditService.Log(plantToUpdate.PlantId, UserHelper.CurrentUser(), currentScheme.Name, "Last Inspection Date", lastInspectionDate.Date.ToShortDateString(), newLastInspectionDate.Date.ToShortDateString());
-                                db.LastInspection.Remove(lastInspectionDate);
-                                db.LastInspection.Add(newLastInspectionDate);
+                                if (lastInspectionDate.Date != newLastInspectionDate.Date)
+                                {
+                                    auditService.Log(plantToUpdate.PlantId, UserHelper.CurrentUser(), currentScheme.Name, "Last Inspection Date", lastInspectionDate.Date.ToShortDateString(), newLastInspectionDate.Date.ToShortDateString());
+                                    lastInspectionDate.Date = newLastInspectionDate.Date;
+                                    db.SetModified(lastInspectionDate);
+                                }
                             }
                         }
                         else

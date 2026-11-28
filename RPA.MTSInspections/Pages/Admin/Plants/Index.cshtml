@@ -1,0 +1,62 @@
+@page "/Admin/Plants"
+@model IndexModel
+
+@{
+    ViewBag.Title = "Plant";
+}
+
+
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
+
+<h2>Plant List</h2>
+
+<form method="get">
+    <div class="col-md-2">
+        <input type="text" name="searchString" id="searchString" style="margin-bottom:10px" />
+    </div>
+    <div class="col-md-1" style="margin-bottom:10px">
+        <button class="btn-primary" style="position:static" id="searchButton">Search</button>
+    </div>
+
+    <div class="col-md-1" style="margin-bottom:10px">
+        <button type="button" class="btn-primary" style="position:static;" onclick="location.href='@Url.Page("/Admin/Plants/Index")'">Reset</button>
+    </div>
+
+    <div class="col-md-offset-11" style="margin-bottom:10px">
+        <p><a asp-page="/Admin/Plants/Create">Add Plant</a></p>
+    </div>
+</form>
+
+<table class="table">
+    <tr>
+        <th>@Html.DisplayNameFor(model => model.Plants[0].LicenceNo)</th>
+
+        <th>@Html.DisplayNameFor(model => model.Plants[0].PlantName)</th>
+
+        <th style="text-align:center">@Html.DisplayNameFor(model => model.Plants[0].Active)</th>
+
+        <th></th>
+
+    </tr>
+
+    @foreach (var item in Model.Plants)
+    {
+    <tr>
+        <td>@Html.DisplayFor(modelItem => item.LicenceNo)</td>
+
+        <td>@Html.DisplayFor(modelItem => item.PlantName)</td>
+
+        <td style="text-align:center">@Html.DisplayFor(modelItem => item.Active)</td>
+
+        <td><a asp-page="/Admin/Plants/Edit" asp-route-guid="@item.PlantId">Edit</a></td>
+
+        @Html.HiddenFor(modelItem => item.PlantId)
+    </tr>
+    }
+</table>
+
+<div class="float-left clear-left">
+    @Html.PagedListPager(Model.Plants, page => Url.Page("/Admin/Plants/Index", new { searchstring = (string)ViewBag.searchData, page, pageSize = Model.Plants.PageSize }))
+    Showing @(Model.Plants.TotalItemCount < Model.Plants.FirstItemOnPage ? 0 : Model.Plants.FirstItemOnPage) to @Model.Plants.LastItemOnPage of @Model.Plants.TotalItemCount
+</div>

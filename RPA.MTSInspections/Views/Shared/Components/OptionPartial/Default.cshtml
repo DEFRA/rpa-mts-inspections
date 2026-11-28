@@ -41,25 +41,25 @@
             @if (item.Criteria.Scheme.Name == "BCC")
             {
                 <td>
-                    @Html.ActionLink("Edit", "BccEdit", new { id = item.OptionId })
+                    <a asp-page="/Admin/Bcc/BccEdit" asp-route-id="@item.OptionId">Edit</a>
                 </td>
             }
             @if (item.Criteria.Scheme.Name == "BLS")
             {
                 <td>
-                    @Html.ActionLink("Edit", "BlsEdit", new { id = item.OptionId })
+                    <a asp-page="/Admin/Bls/BlsEdit" asp-route-id="@item.OptionId">Edit</a>
                 </td>
             }
             @if (item.Criteria.Scheme.Name == "PCG")
             {
                 <td>
-                    @Html.ActionLink("Edit", "PcgEdit", new { id = item.OptionId })
+                    <a asp-page="/Admin/Pcg/PcgEdit" asp-route-id="@item.OptionId">Edit</a>
                 </td>
             }
             @if (item.Criteria.Scheme.Name == "SCC")
             {
                 <td>
-                    @Html.ActionLink("Edit", "SccEdit", new { id = item.OptionId })
+                    <a asp-page="/Admin/Scc/SccEdit" asp-route-id="@item.OptionId">Edit</a>
                 </td>
             }
         </tr>

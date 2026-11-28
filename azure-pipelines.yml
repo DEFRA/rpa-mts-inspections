@@ -67,7 +67,7 @@ stages:
               testResultsFiles: '$(Agent.TempDirectory)/results/*.trx'
 
       - job: SqlServerTests
-        displayName: EF6 provider and migration tests (Windows, LocalDB)
+        displayName: EF Core provider and migration tests (Windows, LocalDB)
         pool:
           vmImage: windows-latest
         steps:

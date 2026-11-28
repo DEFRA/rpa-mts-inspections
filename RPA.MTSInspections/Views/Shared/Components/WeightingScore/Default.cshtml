@@ -1,4 +1,4 @@
-﻿@model RPA.MTSInspections.Models.Criteria
+@model RPA.MTSInspections.Models.Criteria
 
 <table class="table">
     <tr>
@@ -11,7 +11,7 @@
         </td>
 
         <td>
-            @Html.ActionLink("Edit", "EditWeightingScore", new { criteriaId = Model.CriteriaId })
+            <a asp-page="/Admin/EditWeightingScore" asp-route-criteriaId="@Model.CriteriaId">Edit</a>
         </td>
     </tr>
 </table>

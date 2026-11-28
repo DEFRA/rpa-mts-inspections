@@ -1,12 +1,13 @@
-using System.Data.Entity.Migrations;
-using System.Data.Entity.Migrations.Infrastructure;
-using RPA.MTSInspections.Migrations;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
+using RPA.MTSInspections.DAL;
 
 namespace RPA.MTSInspections.Services;
 
 /// <summary>
 /// One-off schema utilities for the DBA or a release pipeline, run instead of the web host:
-/// <c>--script &lt;file&gt;</c> writes the SQL of every migration; <c>--migrate</c> applies them to the configured database.
+/// <c>--script &lt;file&gt;</c> writes the idempotent SQL of every migration; <c>--migrate</c> applies them to the configured database.
 /// The web application itself never creates or changes the schema.
 /// </summary>
 public static class MigrationCommands
@@ -21,7 +22,8 @@ public static class MigrationCommands
             return 2;
         }
 
-        var configuration = new Configuration(connectionString);
+        var options = new DbContextOptionsBuilder<MTSInspectionsContext>().UseSqlServer(connectionString).Options;
+        using var context = new MTSInspectionsContext(options);
 
         if (args[0] == "--script")
         {
@@ -31,8 +33,8 @@ public static class MigrationCommands
                 return 2;
             }
 
-            // Scripts the whole history from an empty database, so the DBA can review and apply it.
-            var sql = new MigratorScriptingDecorator(new DbMigrator(configuration)).ScriptUpdate(null, null);
+            // Idempotent script of the whole history, so the DBA can review it and run it against any database state.
+            var sql = context.GetService<IMigrator>().GenerateScript(options: MigrationsSqlGenerationOptions.Idempotent);
             File.WriteAllText(args[1], sql);
             output.WriteLine($"Wrote {sql.Length} characters of SQL to {args[1]}.");
 
@@ -45,9 +47,8 @@ public static class MigrationCommands
             return 2;
         }
 
-        var migrator = new DbMigrator(configuration);
-        var pending = migrator.GetPendingMigrations().ToList();
-        migrator.Update();
+        var pending = context.Database.GetPendingMigrations().ToList();
+        context.Database.Migrate();
         output.WriteLine($"Applied {pending.Count} migration(s).");
 
         return 0;

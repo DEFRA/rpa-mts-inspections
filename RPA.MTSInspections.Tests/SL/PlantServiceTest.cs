@@ -1,11 +1,11 @@
-﻿using Moq;
+using Moq;
 using NUnit.Framework;
 using RPA.MTSInspections.DAL;
 using RPA.MTSInspections.Models;
 using RPA.MTSInspections.SL;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,8 +17,8 @@ namespace RPA.MTSInspections.Tests.SL
     public class PlantServiceTest
     {
 
-        Mock<DbSet<Plant>> mockPlantSet;
-        Mock<MTSInspectionsContext> mockContext;
+        TestDb db;
+        MTSInspectionsContext context;
         PlantService service;
 
         [SetUp]
@@ -40,19 +40,21 @@ namespace RPA.MTSInspections.Tests.SL
 
             //Create mocks for teams repository and setup mocked behaviour to mimic EF using test data above
 
-            mockPlantSet = new Mock<DbSet<Plant>>();
-            mockPlantSet.As<IQueryable<Plant>>().Setup(x => x.Provider).Returns(plantData.Provider);
-            mockPlantSet.As<IQueryable<Plant>>().Setup(x => x.Expression).Returns(plantData.Expression);
-            mockPlantSet.As<IQueryable<Plant>>().Setup(x => x.ElementType).Returns(plantData.ElementType);
-            mockPlantSet.As<IQueryable<Plant>>().Setup(x => x.GetEnumerator()).Returns(plantData.GetEnumerator());
 
 
             //Setup context and set teams repository to use above mocked object.
-            mockContext = new Mock<MTSInspectionsContext>();
-            mockContext.Setup(x => x.Plant).Returns(mockPlantSet.Object);
+            db = new TestDb().Seed(plantData);
+            context = db.NewContext();
 
             //Setup Service Injecting Mocked Context
-            service = new PlantService(mockContext.Object);
+            service = new PlantService(context);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            context?.Dispose();
+            db?.Dispose();
         }
 
         [Test]

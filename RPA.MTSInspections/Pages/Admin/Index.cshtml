@@ -1,0 +1,24 @@
+@page "/Admin/Index"
+@model AdminHomeModel
+@functions {
+    [Microsoft.AspNetCore.Authorization.Authorize(Policy = MtsPolicies.SupportOrAdmin)]
+    public class AdminHomeModel : Microsoft.AspNetCore.Mvc.RazorPages.PageModel
+    {
+    }
+}
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Admin Area</h2>
+
+    <div class="row">
+        <h3><a asp-page="/Admin/Plants/Index">Edit Plant Details</a></h3>
+        <p>Edit All Plant Details</p>
+    </div>
+
+    <div class="row">
+        <h3><a asp-page="/Admin/AuditLog/PlantAudit">Audit</a></h3>
+        <p>View Audit History for Plants and Schemes</p>
+    </div>

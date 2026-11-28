@@ -4,13 +4,13 @@ using RPA.MTSInspections.Models;
 using RPA.MTSInspections.SL;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace RPA.MTSInspections.SL
 {
@@ -45,7 +45,7 @@ namespace RPA.MTSInspections.SL
             {
                 if (riskNeeded == true)
                 {
-                    plantList = db.Plant.Include(x => x.RiskScore).OrderBy(x => x.PlantName).ThenBy(x => x.PostCode).ToList();
+                    plantList = db.Plant.Include(x => x.RiskScore).ThenInclude(r => r.Scheme).OrderBy(x => x.PlantName).ThenBy(x => x.PostCode).ToList();
                 }
                 else
                 {
@@ -56,7 +56,7 @@ namespace RPA.MTSInspections.SL
             {
                 if (riskNeeded == true)
                 {
-                    plantList = db.Plant.Include(x => x.RiskScore).Where(x => x.PlantName.ToUpper().Contains(searchString.ToUpper().Trim()) || x.LicenceNo.ToUpper().Contains(searchString.ToUpper().Trim())).ToList();
+                    plantList = db.Plant.Include(x => x.RiskScore).ThenInclude(r => r.Scheme).Where(x => x.PlantName.ToUpper().Contains(searchString.ToUpper().Trim()) || x.LicenceNo.ToUpper().Contains(searchString.ToUpper().Trim())).ToList();
                 }
                 else
                 {

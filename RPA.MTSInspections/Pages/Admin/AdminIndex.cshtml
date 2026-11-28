@@ -1,0 +1,51 @@
+@page "/Admin/AdminIndex"
+@model AdminIndexModel
+@functions {
+    [Microsoft.AspNetCore.Authorization.Authorize(Policy = MtsPolicies.AdminOnly)]
+    public class AdminIndexModel : Microsoft.AspNetCore.Mvc.RazorPages.PageModel
+    {
+    }
+}
+@{
+    ViewBag.Title = "AdminIndex";
+}
+
+<h2>Admin Area</h2>
+<div class="row">
+    <h3><a asp-page="/Admin/Bls/BlsOptions">Edit BLS Input Details</a></h3>
+    <p> Edit All BLS Plant Details and Weighting Values</p>
+</div>
+
+<div class="row">
+    <h3><a asp-page="/Admin/Bcc/BccOptions">Edit BCC Input Details</a></h3>
+    <p> Edit All BCC Plant Details and Weighting Values</p>
+</div>
+
+<div class="row">
+    <h3><a asp-page="/Admin/Pcg/PcgOptions">Edit PCG Input Details</a></h3>
+    <p> Edit All PCG Plant Details and Weighting Values</p>
+</div>
+
+<div class="row">
+    <h3><a asp-page="/Admin/Scc/SccOptions">Edit SCC Input Details</a></h3>
+    <p> Edit All SCC Plant Details and Weighting Values</p>
+</div>
+
+<div class="row">
+    <h3><a asp-page="/Admin/Plants/Index">Edit Plant Details</a></h3>
+    <p>Edit All Plant Details</p>
+</div>
+
+<div class="row">
+    <h3><a asp-page="/Admin/AuditLog/PlantAudit">Audit</a></h3>
+    <p>View Audit History for Plants and Schemes</p>
+</div>
+
+<div class="row">
+    <h3>
+        <form asp-controller="Scheme" asp-action="CaclulateAllRiskScores" method="post">
+            <button type="submit" class="btn btn-link" style="font-size:inherit;padding:0;">Calculate All Risk Scores</button>
+        </form>
+    </h3>
+    <p>Force all Risk Scores to Re-calculate</p>
+</div>

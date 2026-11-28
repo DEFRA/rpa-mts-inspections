@@ -1,0 +1,59 @@
+@page "/Home/Index"
+@model HomeIndexModel
+@functions {
+    [Microsoft.AspNetCore.Authorization.Authorize(Policy = MtsPolicies.ReadAccess)]
+    public class HomeIndexModel : Microsoft.AspNetCore.Mvc.RazorPages.PageModel
+    {
+        public void OnGet()
+        {
+            ViewData["Location"] = "Home";
+        }
+    }
+}
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h2 style="text-align:center">MTS Risk Analysis Web Portal</h2>
+
+    <div class="row">
+        <p>
+            MTS Risk Analysis is an application where you can calculate risk scores for multiple schemes.
+        </p>
+    </div>
+
+    <div class="row">
+
+        <h3><a asp-page="/Plants/Index">Plants</a></h3>
+
+        <p>View Details of all Existing Plants</p>
+    </div>
+
+    @if (Access.IsSupport(User))
+    {
+        <div class="row">
+
+            <h3><a asp-page="/Admin/Index">Plant and Risk Score Administration</a></h3>
+
+            <p>Amend/Add Premises, Amend Risk Criteria, Scoring and Weightings</p>
+        </div>
+
+        <div class="row">
+
+            <h3><a asp-page="/Export/Index">Import/Export Data</a></h3>
+
+            <p>Bulk Upload Data or Download Data in a CSV file by selecting a Scheme</p>
+        </div>
+    }
+
+    @if (Access.IsAdmin(User))
+    {
+        <div class="row">
+
+            <h3><a asp-page="/Admin/AdminIndex">Plant and Risk Score Administration</a></h3>
+
+            <p>Amend/Add Premises, Amend Risk Criteria, Scoring and Weightings</p>
+        </div>
+    }
+</div>

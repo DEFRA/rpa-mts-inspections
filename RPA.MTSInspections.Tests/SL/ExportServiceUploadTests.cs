@@ -6,7 +6,7 @@ using OfficeOpenXml;
 using RPA.MTSInspections.DAL;
 using RPA.MTSInspections.Services;
 using RPA.MTSInspections.SL;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace RPA.MTSInspections.Tests.SL
 {
@@ -19,11 +19,9 @@ namespace RPA.MTSInspections.Tests.SL
     {
         private static ExportService Service(UploadOptions options = null)
         {
-            var db = new Mock<MTSInspectionsContext>();
-            db.Setup(x => x.Plant).Returns(new Mock<DbSet<RPA.MTSInspections.Models.Plant>>().SetupData().Object);
-            db.Setup(x => x.Scheme).Returns(new Mock<DbSet<RPA.MTSInspections.Models.Scheme>>().SetupData().Object);
+            var db = new TestDb().NewContext();
 
-            return new ExportService(db.Object, Mock.Of<ISchemeService>(), Mock.Of<IAuditService>(), new FakeUser(),
+            return new ExportService(db, Mock.Of<ISchemeService>(), Mock.Of<IAuditService>(), new FakeUser(),
                 Options.Create(options ?? new UploadOptions()));
         }
 
@@ -178,12 +176,8 @@ namespace RPA.MTSInspections.Tests.SL
         [Test]
         public void The_csv_export_keeps_its_windows_line_endings_and_column_order_on_every_platform()
         {
-            var plants = new Mock<DbSet<RPA.MTSInspections.Models.Plant>>().SetupData();
-            var db = new Mock<MTSInspectionsContext>();
-            db.Setup(x => x.Plant).Returns(plants.Object);
-            db.Setup(x => x.Scheme).Returns(new Mock<DbSet<RPA.MTSInspections.Models.Scheme>>().SetupData().Object);
-            db.Setup(x => x.Option).Returns(new Mock<DbSet<RPA.MTSInspections.Models.Option>>().SetupData().Object);
-            var service = new ExportService(db.Object, Mock.Of<ISchemeService>(), Mock.Of<IAuditService>(), new FakeUser(),
+            var db = new TestDb().NewContext();
+            var service = new ExportService(db, Mock.Of<ISchemeService>(), Mock.Of<IAuditService>(), new FakeUser(),
                 Options.Create(new UploadOptions()));
 
             var csv = service.ConvertListToString("1");
